@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GptEngineer": {
+      "commandName": "Project",
+      "commandLineArgs": "F:\\dev\\gpt-engineer\\hangman gpt4 false"
+    }
+  }
+}
