@@ -1,7 +1,8 @@
-﻿using GptEngineer;
-using OpenAI.Managers;
-using OpenAI;
+﻿namespace GptEngineer;
+
 using System.Text.Json;
+using OpenAI;
+using OpenAI.Managers;
 
 class Program
 {

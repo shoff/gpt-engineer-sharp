@@ -1,4 +1,6 @@
-﻿public class AIOptions
+﻿namespace GptEngineer;
+
+public class AIOptions
 {
     public string? ProjectPath { get; set; } 
     public string Model { get; set; } = "gpt-4";

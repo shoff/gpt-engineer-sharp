@@ -1,0 +1,12 @@
+We are writing a hangman game in javascript and html. Javascript components split in separate files. Ascii art displaying the status of the game (hanged man) be sure to account for CORS. At the end of the game, if the player has not guessed the word, display the word. In addition, anytime a game completes, either the user wins OR looses give 10 points for each successful letter guessed (per letter so if e is used 3 times that is 30 points). A win is + 20 bonus points a loss is -20 points. record these scores in a json named after the user. So user steve would have a file steve.json, determine the file to use by asking the player their name each game. If the player file does not exist, create it. The file format should store a collection of games and scores as well as a overall score by summing the results of all previous games.
+
+Split the javascript components up into whatever makes the most sense and follows best practices. Don't let CORS origin block any requests.
+When you display the word at the end simply replace the letters still being hidden as _ with the actual letter.
+
+Store as a field but summing all of the previous games recorded in the file. The games should be an array listing if the person won, lost, and what the score was. Never overwrite that data always append. Here is an example json file {name:steve,total score: 1022, total games: 30, games: [{points: 35,status: won},{points: 10,status: lost}]}. The files should be stored in folder called db. The file name should be the same name as the player. If you can't find a file for the player, create it.
+
+You can get a random work by issuing a request to https://random-word-api.herokuapp.com/word it returns a value in this format: ["random_word_is_here"] 
+
+Be sure to analyze the files you've already created in the workspace folder so you can focus on improving them rather than re-writing them!
+
+Once you have read this, and understood, reply with [I Understand]. You MUST read the contents of ALL of the files you've already generated and ONLY create new files after all of the functions in the existing files are fleshed out and saved back to the file.

@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptEngineer", "GptEngineer\GptEngineer.csproj", "{09DA38E6-0D8D-4006-8F0A-38E25FC8DABA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer", "src\GptEngineer\GptEngineer.csproj", "{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.API", "src\GptEngineer.API\GptEngineer.API.csproj", "{32C0378C-B67B-4740-BAE6-9070D66E37CE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.Client", "src\GptEngineer.Client\GptEngineer.Client.csproj", "{BEB6C80C-61DD-4ABF-A785-B03AD489A65E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.Core", "src\GptEngineer.Core\GptEngineer.Core.csproj", "{5CEFDD57-EFA5-41B0-9656-E275A2DE5F27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptEngineer.Infrastructure", "src\GptEngineer.Infrastructure\GptEngineer.Infrastructure.csproj", "{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +19,25 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{09DA38E6-0D8D-4006-8F0A-38E25FC8DABA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{09DA38E6-0D8D-4006-8F0A-38E25FC8DABA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{09DA38E6-0D8D-4006-8F0A-38E25FC8DABA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{09DA38E6-0D8D-4006-8F0A-38E25FC8DABA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32C0378C-B67B-4740-BAE6-9070D66E37CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32C0378C-B67B-4740-BAE6-9070D66E37CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32C0378C-B67B-4740-BAE6-9070D66E37CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32C0378C-B67B-4740-BAE6-9070D66E37CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BEB6C80C-61DD-4ABF-A785-B03AD489A65E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEB6C80C-61DD-4ABF-A785-B03AD489A65E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEB6C80C-61DD-4ABF-A785-B03AD489A65E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEB6C80C-61DD-4ABF-A785-B03AD489A65E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CEFDD57-EFA5-41B0-9656-E275A2DE5F27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CEFDD57-EFA5-41B0-9656-E275A2DE5F27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CEFDD57-EFA5-41B0-9656-E275A2DE5F27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CEFDD57-EFA5-41B0-9656-E275A2DE5F27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

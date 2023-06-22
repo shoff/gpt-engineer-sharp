@@ -1,0 +1,71 @@
+﻿@using MudBlazor
+@inherits LayoutComponentBase
+<MudThemeProvider @ref="@mudThemeProvider" @bind-IsDarkMode="@isDarkMode" Theme="theme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="0">
+
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudSpacer />
+        <AuthorizeView>
+            <Authorized>
+                <span class="pad-right">
+                    <strong>Hello, @context?.User?.Identity?.Name!</strong>
+                </span>
+
+                <span class="pad-right">
+                    <form method="post" action="@LOGIN">
+                        <AntiForgeryTokenInput />
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" typeof="submit">Sign out</MudButton>
+                    </form>
+                </span>
+            </Authorized>
+            <NotAuthorized>
+                <a href="@LOGIN">Log in</a>
+            </NotAuthorized>
+        </AuthorizeView>
+        <MudImage Src="images/orange-logo-transparent.png" Alt="logo" Elevation="25" Class="rounded-lg" Height="60" />
+        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Error" Link="https://mudblazor.com/" Target="_blank" />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Warning" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+    </MudAppBar>
+    <MudDrawer @bind-Open="drawerOpen" Elevation="1">
+        <MudDrawerHeader>
+            <MudImage Src="images/orange-logo-transparent.png" Alt="logo" Elevation="25" Class="rounded-lg" Height="60" />
+            <br />
+            <MudText Typo="Typo.h6">GptEngineer Sharp</MudText>
+        </MudDrawerHeader>
+        <NavMenu />
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
+            <MudSwitch @bind-Checked="@isDarkMode" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
+
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+
+@code {
+    private const string LOGIN = "api/v1/Account/Login";
+    private MudThemeProvider mudThemeProvider = null!;
+    private readonly MudTheme theme = new();
+    private bool isDarkMode;
+    bool drawerOpen = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            isDarkMode = await mudThemeProvider.GetSystemPreference();
+            StateHasChanged();
+        }
+    }
+
+    void DrawerToggle()
+    {
+        drawerOpen = !drawerOpen;
+    }
+}
