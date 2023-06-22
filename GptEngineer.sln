@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer", "src\GptEngineer\GptEngineer.csproj", "{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.API", "src\GptEngineer.API\GptEngineer.API.csproj", "{32C0378C-B67B-4740-BAE6-9070D66E37CE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.Client", "src\GptEngineer.Client\GptEngineer.Client.csproj", "{BEB6C80C-61DD-4ABF-A785-B03AD489A65E}"
@@ -19,9 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E61E2E86-3738-42A3-B6AB-08DAB7FCFA9A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{32C0378C-B67B-4740-BAE6-9070D66E37CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{32C0378C-B67B-4740-BAE6-9070D66E37CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{32C0378C-B67B-4740-BAE6-9070D66E37CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
