@@ -1,5 +1,6 @@
 ﻿@namespace GptEngineer.Client.Pages
 @page "/projects"
+@using GptEngineer.Core.Projects
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IAntiforgeryHttpClientFactory HttpClientFactory
@@ -11,29 +12,62 @@
             <MudTextField Label="project name" @bind-Value="textInput" />
         </MudItem>
         <MudItem>
-            <MudSelect T="string" Label="Select an Option" @bind-Value="selectedOption">
-                @foreach (var option in options)
+            <MudSelect T="string" Label="select an existing project" @bind-Value="selectedOption">
+                @foreach (var option in this.projects.Select(o=>o.Name))
                 {
                     <MudSelectItem Value="@option">@option</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
         <MudItem>
-            <MudButton OnClick="@Submit" Variant="Variant.Filled" Color="Color.Primary">Submit</MudButton>
+            <MudButton OnClick="@SubmitAsync" Variant="Variant.Filled" Color="Color.Primary">Submit</MudButton>
         </MudItem>
     </MudForm>
     <MudTextField Label="Streaming Content" @bind-Value="content" Lines="4" Variant="Variant.Outlined" />
+    
+    <MudTable Items="@projects" Hover="true" Breakpoint="Breakpoint.None">
+        <HeaderContent>
+            <MudTh>Name</MudTh>
+            <MudTh>Path</MudTh>
+            <MudTh>Description</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Path">@context.Path</MudTd>
+            <MudTd DataLabel="Description">@context.Description</MudTd>
+        </RowTemplate>
+    </MudTable>
+
 </MudContainer>
 
 @code {
     string? textInput;
     string? selectedOption;
     string? content;
+    string? selectedProjectName;
+    readonly List<Project> projects = new();
+    readonly List<string> options = new() { "Option 1", "Option 2", "Option 3" };
 
-    readonly List<string> options = new List<string> { "Option 1", "Option 2", "Option 3" };
-
-    void Submit()
+    protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+    }
+
+    private async Task SubmitAsync()
+    {
+        this.selectedProjectName = textInput;
+        using var client = await HttpClientFactory.CreateClientAsync();
+        var result = await client.GetAsync("api/v1/projects");
+
+        if (result.IsSuccessStatusCode)
+        {
+            var pr = await result.Content.ReadFromJsonAsync<IAsyncEnumerable<Project>>();
+            await foreach (var project in pr)
+            {
+                projects.Add(project);
+            }
+        }
+    
         content += $"You entered: {textInput}, and selected: {selectedOption}\n";
         Snackbar.Add("Submitted!", Severity.Success);
     }

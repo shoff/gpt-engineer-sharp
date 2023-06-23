@@ -1,6 +1,9 @@
 ﻿namespace GptEngineer.Infrastructure;
 
 using Core.Configuration;
+using GptEngineer.Client.Services;
+using GptEngineer.Core;
+using GptEngineer.Core.Projects;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
@@ -34,10 +37,12 @@ public static class Ioc
             settings.ApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
                 ?? throw new InvalidOperationException();
         });
-
+        // this might need to go on the API
+        services.AddSingleton<IProjectFactory, ProjectFactory>();
+        services.AddSingleton<IProjectService, ProjectService>();
         services.AddTransient<ISteps, Steps>();
         services.AddTransient<IStepRunner, StepRunner>();
-        services.AddTransient<IDBs, DBs>();
+        services.AddTransient<IDataStores, DataStores>();
         services.AddTransient<IAI, AI>();
         return services;
     }

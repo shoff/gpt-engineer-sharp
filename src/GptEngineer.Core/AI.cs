@@ -1,5 +1,5 @@
-﻿namespace GptEngineer;
-using System.Diagnostics;
+﻿namespace GptEngineer.Core;
+
 using GptEngineer.Core.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -47,7 +47,7 @@ public class AI : IAI
         return await this.NextAsync(messages);
     }
 
-    public Dictionary<string, string> FSystem(string msg)
+    public Dictionary<string, string> AsSystemRole(string msg)
     {
         var result = new Dictionary<string, string>
         {
@@ -58,16 +58,17 @@ public class AI : IAI
         return result;
     }
 
-    public Dictionary<string, string> FUser(string msg)
+    public Dictionary<string, string> AsUserRole(string msg)
     {
         return new Dictionary<string, string> { { ROLE, USER }, { CONTENT, msg } };
     }
 
-    public Dictionary<string, string> FAssistant(string msg)
+    public Dictionary<string, string> AsAssistantRole(string msg)
     {
         return new Dictionary<string, string> { { ROLE, ASSISTANT }, { CONTENT, msg } };
     }
 
+    // Use the NextAsync method below instead of this one for now
     public async Task<List<Dictionary<string, string>>> Next(List<Dictionary<string, string>> messages, string? prompt = null)
     {
         if (!string.IsNullOrWhiteSpace(prompt))
@@ -77,7 +78,7 @@ public class AI : IAI
 
         this.logger.LogInformation("Creating a new chat completion: {Messages}", messages);
 
-        var x = messages.Select(m => new Message
+        var x = messages.Select(m => new GptMessage
         {
             Role = m[ROLE],
             Content = m[CONTENT]
@@ -89,48 +90,14 @@ public class AI : IAI
         {
             messageList.Add(new ChatMessage(message.Role, message.Content));
         }
-
-
+        
         var completionResult = await this.openAIService.ChatCompletion
             .CreateCompletion(new ChatCompletionCreateRequest
         {
             // convert the messages to a list of ChatMessage objects
             Messages = messageList,
-            //Messages = new List<ChatMessage>
-            //{
-            //    ChatMessage.FromSystem(x.FirstOrDefault(f=>f.Role == SYSTEM)?.Content),
-            //    ChatMessage.FromUser(x.FirstOrDefault(f=>f.Role == USER)?.Content),
-            //    ChatMessage.FromAssistant(x.FirstOrDefault(f=>f.Role == ASSISTANT)?.Content),
-            //    ChatMessage.FromUser(x.FirstOrDefault(f=>f.Role == USER)?.Content)
-            //},
             Model = Models.Gpt_4,
-            // MaxTokens = 50//optional
         });
-
-        //var completionResult = Program.AIService.Completions.CreateCompletionAsStream(new CompletionCreateRequest()
-        //{
-        //    Prompt = "Once upon a time",
-        //    MaxTokens = 2500
-        //}, Models.Gpt_4);
-
-        //await foreach (var completion in completionResult)
-        //{
-        //    if (completion.Successful)
-        //    {
-        //        Console.Write(completion.Choices.FirstOrDefault()?.Text);
-        //    }
-        //    else
-        //    {
-        //        if (completion.Error == null)
-        //        {
-        //            throw new Exception("Unknown Error");
-        //        }
-
-        //        Console.WriteLine($"{completion.Error.Code}: {completion.Error.Message}");
-        //    }
-        //}
-        //Console.WriteLine("Complete");
-
 
         if (completionResult.Successful)
         {
@@ -140,7 +107,6 @@ public class AI : IAI
         List<string> chat = new();
         foreach (var chunk in completionResult.Choices)
         {
-            // var delta = chunk[0]["delta"];// chunk["choices"][0]["delta"];
             var msg = chunk.Delta.Content ?? "";
             // TODO do something with this?
             Console.Write(msg);
@@ -151,6 +117,7 @@ public class AI : IAI
         return messages;
     }
 
+    // TODO validate that this is generating the correct prompt
     public async Task<List<Dictionary<string, string>>> NextAsync(List<Dictionary<string, string>> messages, string? prompt = null)
     {
         if (!string.IsNullOrWhiteSpace(prompt))
@@ -160,30 +127,18 @@ public class AI : IAI
 
         this.logger.LogInformation("Creating a new chat completion: {Messages}", messages);
 
-        var x = messages.Select(m => new Message
+        var x = messages.Select(m => new GptMessage
         {
             Role = m[ROLE],
             Content = m[CONTENT]
         }).ToList();
 
-        var messageList = new List<ChatMessage>();
-
-        foreach (var message in x)
-        {
-            messageList.Add(new ChatMessage(message.Role!, message.Content!));
-        }
-
+        var messageList = x.Select(message => new ChatMessage(message.Role!, message.Content!)).ToList();
+        
         var completionResult = this.openAIService.ChatCompletion.CreateCompletionAsStream(
             new ChatCompletionCreateRequest
             {
                 Messages = messageList,
-                //Messages = new List<ChatMessage>
-                //{
-                //    new(StaticValues.ChatMessageRoles.System, "You are a helpful assistant."),
-                //    new(StaticValues.ChatMessageRoles.User, "Who won the world series in 2020?"),
-                //    new(StaticValues.ChatMessageRoles.System, "The Los Angeles Dodgers won the World Series in 2020."),
-                //    new(StaticValues.ChatMessageRoles.User, "Tell me a story about The Los Angeles Dodgers")
-                //},
                 Model = Models.ChatGpt3_5Turbo,
                 MaxTokens = 150//optional
             });
@@ -195,13 +150,7 @@ public class AI : IAI
 
             if (completion.Successful)
             {
-                foreach (var chunk in completion.Choices)
-                {
-                    // var delta = chunk[0]["delta"];// chunk["choices"][0]["delta"];
-                    var msg = chunk.Delta.Content ?? "";
-                    // Console.Write(msg);
-                    chat.Add(msg);
-                }
+                chat.AddRange(completion.Choices.Select(chunk => chunk.Delta.Content ?? ""));
                 messages.Add(new Dictionary<string, string> { { ROLE, ASSISTANT }, { CONTENT, string.Join("", chat) } });
                 
                 // TODO send to hub

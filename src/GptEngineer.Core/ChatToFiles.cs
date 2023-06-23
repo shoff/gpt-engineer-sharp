@@ -1,6 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿namespace GptEngineer.Core;
 
-namespace GptEngineer;
+using System.Text.RegularExpressions;
 
 public class ChatToFiles
 {

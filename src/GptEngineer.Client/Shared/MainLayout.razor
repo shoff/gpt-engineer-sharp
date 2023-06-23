@@ -26,15 +26,14 @@
                 <a href="@LOGIN">Log in</a>
             </NotAuthorized>
         </AuthorizeView>*@
-        <MudImage Src="images/orange-logo-transparent.png" Alt="logo" Elevation="25" Class="rounded-lg" Height="60" />
+        <MudImage Src="images/gpt-engineer-brain.png" Alt="logo" Elevation="25" Class="rounded-lg" Height="60" />
         <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Error" Link="https://mudblazor.com/" Target="_blank" />
         <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Warning" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
     </MudAppBar>
     <MudDrawer @bind-Open="drawerOpen" Elevation="1">
         <MudDrawerHeader>
-            <MudImage Src="images/orange-logo-transparent.png" Alt="logo" Elevation="25" Class="rounded-lg" Height="60" />
-            <br />
-            <MudText Typo="Typo.h6">GptEngineer Sharp</MudText>
+            <MudImage Src="images/gpt-engineer-brain.png" Alt="logo" Elevation="25" Class="rounded-lg" Height="60" />
+            <MudText Class="brand">GptEngineer Sharp</MudText>
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>

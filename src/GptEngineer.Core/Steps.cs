@@ -1,5 +1,5 @@
 ﻿// ReSharper disable ParameterHidesMember
-namespace GptEngineer;
+namespace GptEngineer.Core;
 
 using System.Diagnostics;
 using System.Text.Json;
@@ -7,11 +7,11 @@ using System.Text.RegularExpressions;
 
 public class Steps : ISteps
 {
-    private readonly IDBs dbs;
+    private readonly IDataStores dbs;
     private readonly IAI ai;
     private static readonly Regex regex = new(@"(\S+?)\n```\S+\n(.+?)```", RegexOptions.Compiled);
 
-    public Steps(IAI ai, IDBs dbs)
+    public Steps(IAI ai, IDataStores dbs)
     {
         this.ai = ai;
         this.dbs = dbs;
@@ -34,7 +34,7 @@ public class Steps : ISteps
     {
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.dbs.Identity["qa"])
+            this.ai.AsSystemRole(this.dbs.Identity["qa"])
         };
         var user = this.dbs.Input["main_prompt"]; // user is the main prompt
 
@@ -73,8 +73,8 @@ public class Steps : ISteps
         // Generate a spec from the main prompt + clarifications and save the results to the workspace
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.SetupSysPrompt()),
-            this.ai.FSystem($"Instructions: {this.dbs.Input["main_prompt"]}")
+            this.ai.AsSystemRole(this.SetupSysPrompt()),
+            this.ai.AsSystemRole($"Instructions: {this.dbs.Input["main_prompt"]}")
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity["spec"]);
@@ -90,7 +90,7 @@ public class Steps : ISteps
         var someString = this.dbs.Logs[nameof(genSpec)];
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.dbs.Identity["respec"])
+            this.ai.AsSystemRole(this.dbs.Identity["respec"])
         };
         messages = await this.ai.NextAsync(messages);
         messages = await this.ai.NextAsync(
@@ -112,7 +112,7 @@ public class Steps : ISteps
     {
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.SetupSysPrompt()), this.ai.FUser($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.FUser($"Specification:\n\n{this.dbs.Memory["specification"]}")
+            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory["specification"]}")
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity["unit_tests"]);
@@ -128,7 +128,7 @@ public class Steps : ISteps
 
         messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.SetupSysPrompt()),
+            this.ai.AsSystemRole(this.SetupSysPrompt()),
         }.Concat(messages.Skip(1)).ToList();
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity["use_qa"]);
@@ -141,10 +141,10 @@ public class Steps : ISteps
     {
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.SetupSysPrompt()),
-            this.ai.FUser($"Instructions: {this.dbs.Input["main_prompt"]}"),
-            this.ai.FUser($"Specification:\n\n{this.dbs.Memory["specification"]}"), 
-            this.ai.FUser($"Unit tests:\n\n{this.dbs.Memory["unit_tests"]}")
+            this.ai.AsSystemRole(this.SetupSysPrompt()),
+            this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"),
+            this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory["specification"]}"), 
+            this.ai.AsUserRole($"Unit tests:\n\n{this.dbs.Memory["unit_tests"]}")
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity["use_qa"]);
@@ -238,7 +238,7 @@ public class Steps : ISteps
     {
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.SetupSysPrompt()), this.ai.FUser($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.FAssistant(this.dbs.Workspace["all_output.txt"]), this.ai.FSystem(this.dbs.Identity["use_feedback"])
+            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.AsAssistantRole(this.dbs.Workspace["all_output.txt"]), this.ai.AsSystemRole(this.dbs.Identity["use_feedback"])
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Memory["feedback"]);
@@ -251,7 +251,7 @@ public class Steps : ISteps
         var codeOutput = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.GenCode)]).Last()["content"];
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.FSystem(this.SetupSysPrompt()), this.ai.FUser($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.FUser(codeOutput), this.ai.FSystem(this.dbs.Identity["fix_code"])
+            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.AsUserRole(codeOutput), this.ai.AsSystemRole(this.dbs.Identity["fix_code"])
         };
 
         messages = await this.ai.NextAsync(messages, "Please fix any errors in the code above.");
@@ -259,7 +259,7 @@ public class Steps : ISteps
         return messages;
     }
     
-    private void ToFiles(string s, DB workspace)
+    private void ToFiles(string s, DataStore workspace)
     {
         workspace["all_output.txt"] = s;
         var files = this.ParseChat(s);

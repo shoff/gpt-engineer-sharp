@@ -1,6 +1,9 @@
 ﻿namespace GptEngineer.API.Controllers;
 
+using Client.Services;
 using Core.Configuration;
+using Core.Projects;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -9,51 +12,33 @@ public class ProjectController : ControllerBase
 {
     private readonly ILogger<ProjectController> logger;
     private readonly IOptions<AIOptions> options;
+    private readonly IProjectService projectService;
 
     public ProjectController(
         ILogger<ProjectController> logger,
-        IOptions<AIOptions> options)
+        IOptions<AIOptions> options,
+        IProjectService projectService)
     {
         this.logger = logger;
         this.options = options;
+        this.projectService = projectService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<Project> GetAsync(CancellationToken cancellationToken)
     {
         var directory = this.options.Value.ProjectPath;
-        if (directory == null)
-        {
-            this.logger.LogError("ProjectPath is null");
-            return new StatusCodeResult(500);
-        }
 
-        if (!Directory.Exists(directory))
+        if (directory is null || !Directory.Exists(directory))
         {
-            // create directory
-            try
-            {
-                Directory.CreateDirectory(directory);
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogError(ex, "Failed to create directory");
-                return new StatusCodeResult(500);
-            }
-
-            return this.Ok(new List<string>());
+            this.logger.LogError("ProjectPath is null or does not exist");
+            yield break;
         }
-
-        // read all of the projects available
-        try
+        var projects = await this.projectService.GetProjectsAsync(directory);
+        foreach (var project in projects)
         {
-            var files = Directory.GetFiles(directory);
-            return this.Ok(files.Select(Path.GetFileName));
-        }
-        catch (Exception e)
-        {
-            this.logger.LogError(e, "Failed to read directory");
-            return new StatusCodeResult(500);
+            await Task.Yield(); // This line is important to ensure the method yields control back to the caller before continuing the loop
+            yield return project;
         }
     }
 }

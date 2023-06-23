@@ -1,4 +1,4 @@
-﻿namespace GptEngineer;
+﻿namespace GptEngineer.Core;
 
 public interface ISteps
 {

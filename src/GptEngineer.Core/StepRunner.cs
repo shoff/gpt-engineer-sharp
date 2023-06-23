@@ -1,9 +1,9 @@
-﻿namespace GptEngineer;
+﻿namespace GptEngineer.Core;
 
 public class StepRunner : IStepRunner
 {
     private readonly Steps steps;
-    public StepRunner(IAI ai, IDBs dbs)
+    public StepRunner(IAI ai, IDataStores dbs)
     {
         this.steps = new Steps(ai, dbs);
     }

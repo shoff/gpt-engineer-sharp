@@ -1,12 +1,12 @@
-﻿using System.Text;
+﻿namespace GptEngineer.Core;
 
-namespace GptEngineer;
+using System.Text;
 
-public class DB
+public class DataStore
 {
     private readonly string path;
 
-    public DB(string path)
+    public DataStore(string path)
     {
         this.path = Path.GetFullPath(path);
 
