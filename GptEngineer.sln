@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.Client", "src\G
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.Core", "src\GptEngineer.Core\GptEngineer.Core.csproj", "{5CEFDD57-EFA5-41B0-9656-E275A2DE5F27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptEngineer.Infrastructure", "src\GptEngineer.Infrastructure\GptEngineer.Infrastructure.csproj", "{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.Infrastructure", "src\GptEngineer.Infrastructure\GptEngineer.Infrastructure.csproj", "{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

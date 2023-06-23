@@ -1,0 +1,40 @@
+﻿@namespace GptEngineer.Client.Pages
+@page "/projects"
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IAntiforgeryHttpClientFactory HttpClientFactory
+
+<PageTitle>GPT Engineer Projects</PageTitle>
+<MudContainer>
+    <MudForm>
+        <MudItem>
+            <MudTextField Label="project name" @bind-Value="textInput" />
+        </MudItem>
+        <MudItem>
+            <MudSelect T="string" Label="Select an Option" @bind-Value="selectedOption">
+                @foreach (var option in options)
+                {
+                    <MudSelectItem Value="@option">@option</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem>
+            <MudButton OnClick="@Submit" Variant="Variant.Filled" Color="Color.Primary">Submit</MudButton>
+        </MudItem>
+    </MudForm>
+    <MudTextField Label="Streaming Content" @bind-Value="content" Lines="4" Variant="Variant.Outlined" />
+</MudContainer>
+
+@code {
+    string? textInput;
+    string? selectedOption;
+    string? content;
+
+    readonly List<string> options = new List<string> { "Option 1", "Option 2", "Option 3" };
+
+    void Submit()
+    {
+        content += $"You entered: {textInput}, and selected: {selectedOption}\n";
+        Snackbar.Add("Submitted!", Severity.Success);
+    }
+}

@@ -7,11 +7,12 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddOptions();
 // builder.SetupLogging((IConfiguration)builder.Configuration);
+#if !DEBUG
 builder.Services.AddAuthorizationCore();
 builder.Services.TryAddSingleton<AuthenticationStateProvider, HostAuthenticationStateProvider>();
 builder.Services.TryAddSingleton(sp => (HostAuthenticationStateProvider)sp.GetRequiredService<AuthenticationStateProvider>());
 builder.Services.AddTransient<AuthorizedHandler>();
-
+#endif
 builder.RootComponents.Add<App>(ROOT_COMPONENT);
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
