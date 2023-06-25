@@ -4,10 +4,16 @@ using System.Text.Json;
 
 public class Memory
 {
+    private const string SPECIFICATION = "specification";
+    private const string UNIT_TEST = "unit_test";
+    private const string LOGS = "/logs";
 
     public Memory(string path)
     {
+        ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
         this.Path = path;
+        CreateIfNotExists(path);
+        this.GptLog = new GptLog(System.IO.Path.Combine(path,  LOGS));
     }
 
     public async Task FillAsync(string memoryFile)
@@ -17,14 +23,14 @@ public class Memory
             return;
         }
 
-        if (memoryFile == "specification")
+        if (memoryFile == SPECIFICATION)
         {
             var json = await File.ReadAllTextAsync(memoryFile);
             var specification = JsonSerializer.Deserialize<ICollection<GptMessage>>(json);
             this.Specifications = specification;
         }
 
-        if (memoryFile == "unit_test")
+        if (memoryFile == UNIT_TEST)
         {
             var json = await File.ReadAllTextAsync(memoryFile);
             var unitTests = JsonSerializer.Deserialize<ICollection<GptMessage>>(json);
@@ -33,18 +39,40 @@ public class Memory
 
         if (this.HasLogs)
         {
-            await this.Log.FillAsync(this.Path + "/logs");
+            await this.GptLog.FillAsync($"{this.Path}{LOGS}");
+        }
+        else
+        {
+            try
+            {
+                // create it
+                Directory.CreateDirectory($"{this.Path}{LOGS}");
+            }
+            catch (Exception ex)
+            {
+                this.Errors.Add(ex.Message);
+            }
         }
     }
 
-    public bool HasLogs => Directory.Exists(this.Path + "/logs");
-
-    public GptLog Log { get; } = new();
-
+    public bool HasLogs => Directory.Exists($"{this.Path}{LOGS}");
+    public GptLog GptLog { get; }
     public ICollection<GptMessage>? Specifications { get; private set; } = new HashSet<GptMessage>();
-
     public ICollection<GptMessage>? UnitTests { get; private set; } = new HashSet<GptMessage>();
-
+    public ICollection<string> Errors => new HashSet<string>();
     public string Path { get; init; }
-
+    private void CreateIfNotExists(string path)
+    {
+        if (!Directory.Exists(path))
+        {
+            try
+            {
+                Directory.CreateDirectory(path);
+            }
+            catch (Exception e)
+            {
+                this.Errors.Add(e.Message);
+            }
+        }
+    }
 }

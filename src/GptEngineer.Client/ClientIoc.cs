@@ -1,8 +1,9 @@
 ﻿namespace GptEngineer.Client;
 using Blazored.LocalStorage;
+using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 
-public static class Ioc
+public static class ClientIoc
 {
     public static WebAssemblyHostBuilder ConfigureOptions(this WebAssemblyHostBuilder builder)
     {
@@ -29,7 +30,8 @@ public static class Ioc
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(APPLICATION_JSON));
         }).AddHttpMessageHandler<AuthorizedHandler>();
 
-        builder.Services.AddHttpClient<ILogService, LogService>();
+        builder.Services.AddScoped<StreamService>();
+        builder.Services.AddScoped<ChatHubService>();
         builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(DEFAULT));
         builder.Services.AddTransient<IAntiforgeryHttpClientFactory, AntiforgeryHttpClientFactory>();
         builder.Services.AddMudServices();

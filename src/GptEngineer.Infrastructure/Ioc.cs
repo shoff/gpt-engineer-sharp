@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using GptEngineer.Infrastructure.Projects;
+using GptEngineer.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -6,7 +8,6 @@ using Microsoft.AspNetCore.ResponseCompression;
 namespace GptEngineer.Infrastructure;
 
 using Core.Configuration;
-using GptEngineer.Client.Services;
 using GptEngineer.Core;
 using GptEngineer.Core.Projects;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ using OpenAI.Extensions;
 
 public static class Ioc
 {
+
     public static IServiceCollection ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions(); services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Pages");
@@ -39,7 +41,7 @@ public static class Ioc
 
         services.AddOpenAIService(settings =>
         {
-            settings.ApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
+            settings.ApiKey = Environment.GetEnvironmentVariable(OPENAI_API_KEY)
                 ?? throw new InvalidOperationException();
         });
 
@@ -62,7 +64,7 @@ public static class Ioc
         services.AddResponseCompression(opts =>
         {
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
-                new[] { "application/octet-stream" });
+                new[] { APPLICATION_OCTET_STREAM });
         });
         // this might need to go on the API
         services.AddSingleton<IProjectFactory, ProjectFactory>();

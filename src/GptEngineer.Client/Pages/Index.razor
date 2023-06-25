@@ -2,6 +2,8 @@
 @inject NavigationManager Navigation
 @inject GlobalStateService StateService
 @inject IJSRuntime JSRuntime
+@inject StreamService StreamService
+@inject ChatHubService ChatHubService
 @using Microsoft.AspNetCore.SignalR.Client
 
 <PageTitle>GptEngineer Sharp</PageTitle>
@@ -10,8 +12,7 @@
 <MudPaper Class="chat-user-dialog">
     <MudForm>
         <MudItem Class="pad-left">
-            <MudTextField
-                @bind-Value="@this.StateService.UserDisplayName" />
+            <MudTextField @bind-Value="@this.StateService.UserDisplayName" />
         </MudItem>
         <MudItem Class="pad-left">
             <MudTextField Label="Message:" @bind-Value="messageInput" Adornment="Adornment.End" Lines="1"></MudTextField>
@@ -33,6 +34,24 @@
         </MudList>
     </MudItem>
 </MudPaper>
+<MudPaper>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@StartStream">
+        Start Stream
+    </MudButton>
+</MudPaper>
+
+@foreach (var number in numbers)
+{
+    <MudText>@number</MudText>
+}
+
+@if (!this.connectionOn)
+{
+    <MudAlert Severity="Severity.Error">
+        No AI connection is currently available
+    </MudAlert>
+}
 
 <MudAlert Severity="Severity.Normal">
     You can find documentation and examples on our website here:
@@ -44,29 +63,41 @@
     private readonly List<string> messages = new();
     private string? userInput;
     private string? messageInput;
+    private bool connectionOn;
 
     protected override async Task OnInitializedAsync()
     {
-       this.userInput = this.StateService.UserDisplayName;
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
-            .Build();
+        this.userInput = this.StateService.UserDisplayName;
+        
+        // TOD put this into a service 
+        this.hubConnection = ChatHubService.GetHubConnection();
+        if (hubConnection is null)
+        {
+            this.connectionOn = false;
+            return;
+        }
+        this.connectionOn = true;
+        this.hubConnection.On<string>(PROJECT_LOADED, (message) =>
+        {
+            messages.Add(message);
+            StateHasChanged();
+        });
 
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        this.hubConnection.On<string, string>(RECEIVE_MESSAGE, (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
             messages.Add(encodedMsg);
             StateHasChanged();
         });
-
-        await hubConnection.StartAsync();
+        await this.hubConnection.StartAsync();
+        await this.hubConnection.SendAsync(START_PROJECT, "hangman");
     }
 
     private async Task Send()
     {
         if (hubConnection is not null)
         {
-            await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+            await hubConnection.SendAsync(SEND_MESSAGE, userInput, messageInput);
             this.messageInput = null;
             await ScrollToBottom();
             this.StateHasChanged();
@@ -76,7 +107,7 @@
             // show error message
         }
     }
-    
+
     public bool IsConnected =>
         hubConnection?.State == HubConnectionState.Connected;
 
@@ -91,4 +122,21 @@
     {
         await JSRuntime.InvokeVoidAsync("scrollToBottomIfNeeded", "conversation");
     }
+
+
+    private readonly List<int> numbers = new List<int>();
+
+    private async Task StartStream()
+    {
+        await foreach (var number in StreamService.GetStream())
+        {
+            numbers.Add(number);
+            StateHasChanged(); // Trigger UI update
+        }
+    }
+
+        private const string START_PROJECT = "StartProject";
+        private const string PROJECT_LOADED = "ProjectLoaded";
+        private const string RECEIVE_MESSAGE = "ReceiveMessage";
+        private const string SEND_MESSAGE = "SendMessage";
 }

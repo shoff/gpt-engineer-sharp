@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using GptEngineer.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GptEngineer.API.Controllers;
 
@@ -27,7 +28,6 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     public async IAsyncEnumerable<Project> GetAsync()
     {
         var directory = this.options.Value.ProjectPath;

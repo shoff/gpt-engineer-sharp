@@ -7,6 +7,11 @@ using System.Text.RegularExpressions;
 
 public class Steps : ISteps
 {
+    private const string GEN_SPEC_MESSAGE = "Based on the conversation so far, please reiterate the specification for "
+                                            + "the program. If there are things that can be improved, please incorporate the "
+                                            + "improvements. If you are satisfied with the specification, just write out the "
+                                            + "specification word by word again.";
+
     private readonly IDataStores dbs;
     private readonly IAI ai;
     private static readonly Regex regex = new(@"(\S+?)\n```\S+\n(.+?)```", RegexOptions.Compiled);
@@ -78,16 +83,17 @@ public class Steps : ISteps
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity["spec"]);
-
         this.dbs.Memory["specification"] = messages.Last()["content"];
-
         return messages;
     }
 
     public async Task<List<Dictionary<string, string>>> Respec()
     {
+        // ReSharper disable once RedundantAssignment
         var genSpec = await this.GenSpec();
+
         var someString = this.dbs.Logs[nameof(genSpec)];
+        
         var messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.dbs.Identity["respec"])
@@ -96,10 +102,7 @@ public class Steps : ISteps
         messages = await this.ai.NextAsync(
             messages,
             (
-                "Based on the conversation so far, please reiterate the specification for "
-                + "the program. If there are things that can be improved, please incorporate the "
-                + "improvements. If you are satisfied with the specification, just write out the "
-                + "specification word by word again."
+                GEN_SPEC_MESSAGE
             )
         );
 

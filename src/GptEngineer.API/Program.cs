@@ -65,6 +65,7 @@ public static class Program
         app.MapRazorPages();
         app.MapControllers();
         app.MapHub<ChatHub>("/chathub");
+        app.MapHub<ChatHub>("/aihub");
         app.MapFallbackToPage("/_Host");
         app.Run();
     }
