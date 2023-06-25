@@ -4,6 +4,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IAntiforgeryHttpClientFactory HttpClientFactory
+@attribute [AllowAnonymous]
 
 <PageTitle>GPT Engineer Projects</PageTitle>
 <MudContainer>
@@ -20,8 +21,8 @@
             </MudSelect>
         </MudItem>
         <MudItem>
-            <MudButton
-                OnClick="@SubmitAsync" 
+            <MudButton 
+                OnClickAsync="@SubmitAsync()"
                 Variant="Variant.Filled" 
                 Color="Color.Primary">Submit</MudButton>
         </MudItem>
@@ -58,10 +59,10 @@
 
     private async Task SubmitAsync()
     {
+        Console.WriteLine("SubmitAsync called");
         this.selectedProjectName = textInput;
         using var client = await HttpClientFactory.CreateClientAsync();
         var result = await client.GetAsync("https://localhost:7003/api/v1/project");
-
         if (result.IsSuccessStatusCode)
         {
             var pr = await result.Content.ReadFromJsonAsync<IAsyncEnumerable<Project>>();

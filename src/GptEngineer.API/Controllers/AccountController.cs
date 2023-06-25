@@ -17,6 +17,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("Login")]
+    [AllowAnonymous]
     public ActionResult Login(string returnUrl)
     {
         this.logger.LogDebug("Account/Login?returnUrl={ReturnUrl}", returnUrl);
