@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-[Route("api/v1/[controller]")]
+[Route("api/v1/project")]
 public class ProjectController : ControllerBase
 {
     private readonly ILogger<ProjectController> logger;
@@ -28,7 +28,7 @@ public class ProjectController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async IAsyncEnumerable<Project> GetAsync(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<Project> GetAsync()
     {
         var directory = this.options.Value.ProjectPath;
 

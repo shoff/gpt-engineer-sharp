@@ -1,25 +1,37 @@
 ﻿@page "/"
 @inject NavigationManager Navigation
+@inject GlobalStateService StateService
+@inject IJSRuntime JSRuntime
 @using Microsoft.AspNetCore.SignalR.Client
 
 <PageTitle>GptEngineer Sharp</PageTitle>
-<MudText Typo="Typo.h3" GutterBottom="true">About Us</MudText>
+<MudText Typo="Typo.h3" GutterBottom="true">Alpha: Chat to code</MudText>
 
-<MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+<MudPaper Class="chat-user-dialog">
+    <MudForm>
+        <MudItem Class="pad-left">
+            <MudTextField
+                @bind-Value="@this.StateService.UserDisplayName" />
+        </MudItem>
+        <MudItem Class="pad-left">
+            <MudTextField Label="Message:" @bind-Value="messageInput" Adornment="Adornment.End" Lines="1"></MudTextField>
+        </MudItem>
+        <MudItem>
+            <input type="hidden" id="user" value="@StateService.UserDisplayName" />
+            <MudButton OnClick="Send" Disabled="@(!IsConnected)" Color="Color.Primary">Send</MudButton>
+        </MudItem>
+    </MudForm>
+</MudPaper>
 
-    <MudTextField Label="User:" @bind-Value="userInput"></MudTextField>
-    <MudTextField Label="Message:" @bind-Value="messageInput" Adornment="Adornment.End" Lines="1"></MudTextField>
-    <MudButton OnClick="Send" Disabled="@(!IsConnected)" Color="Color.Primary">Send</MudButton>
-
-    <MudDivider/>
-
-    <MudList>
-        @foreach (var message in messages)
-        {
-            <MudListItem>@message</MudListItem>
-        }
-    </MudList>
-
+<MudPaper>
+    <MudItem id="conversation" Class="chat-dialog conversation">
+        <MudList>
+            @foreach (var message in messages)
+            {
+                <MudListItem>@message</MudListItem>
+            }
+        </MudList>
+    </MudItem>
 </MudPaper>
 
 <MudAlert Severity="Severity.Normal">
@@ -29,12 +41,13 @@
 
 @code {
     private HubConnection? hubConnection;
-    private List<string> messages = new();
+    private readonly List<string> messages = new();
     private string? userInput;
     private string? messageInput;
 
     protected override async Task OnInitializedAsync()
     {
+       this.userInput = this.StateService.UserDisplayName;
         hubConnection = new HubConnectionBuilder()
             .WithUrl(Navigation.ToAbsoluteUri("/chathub"))
             .Build();
@@ -54,9 +67,16 @@
         if (hubConnection is not null)
         {
             await hubConnection.SendAsync("SendMessage", userInput, messageInput);
+            this.messageInput = null;
+            await ScrollToBottom();
+            this.StateHasChanged();
+        }
+        else
+        {
+            // show error message
         }
     }
-
+    
     public bool IsConnected =>
         hubConnection?.State == HubConnectionState.Connected;
 
@@ -66,5 +86,9 @@
         {
             await hubConnection.DisposeAsync();
         }
+    }
+    private async Task ScrollToBottom()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollToBottomIfNeeded", "conversation");
     }
 }

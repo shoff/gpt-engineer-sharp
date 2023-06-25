@@ -13,6 +13,7 @@ public static class Ioc
     public static WebAssemblyHostBuilder RegisterDependencies(this WebAssemblyHostBuilder builder)
     {
         builder.Services.AddAuthorizationCore();
+        builder.Services.AddScoped<GlobalStateService>();
         builder.Services.TryAddSingleton<AuthenticationStateProvider, HostAuthenticationStateProvider>();
         builder.Services.TryAddSingleton(sp => (HostAuthenticationStateProvider)sp.GetRequiredService<AuthenticationStateProvider>());
         builder.Services.AddTransient<AuthorizedHandler>();
@@ -36,4 +37,5 @@ public static class Ioc
         builder.Services.AddBlazoredLocalStorage();
         return builder;
     }
+
 }

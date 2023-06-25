@@ -1,10 +1,13 @@
 ﻿@namespace GptEngineer.Client.Pages
 @page "/projects"
 @using GptEngineer.Core.Projects
+@using System.Text.Json
+@using System.Text
+@using System.Net.Mime
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
-@inject ILogService logService;
 @inject IAntiforgeryHttpClientFactory HttpClientFactory
+
 
 <PageTitle>GPT Engineer Projects</PageTitle>
 <MudContainer>
@@ -59,10 +62,16 @@
 
     private async Task SubmitAsync()
     {
-        await this.logService.LogError("Does this work?");
-        Console.WriteLine("SubmitAsync called");
-        this.selectedProjectName = textInput;
         using var client = await HttpClientFactory.CreateClientAsync();
+
+        var errorMessageContent = new StringContent(
+            JsonSerializer.Serialize("Does this work?"),
+            Encoding.UTF8,
+            MediaTypeNames.Application.Json);
+
+        await client.PostAsync("/api/v1/log/error", errorMessageContent);
+
+        this.selectedProjectName = textInput;
         var result = await client.GetAsync("/api/v1/project");
         if (result.IsSuccessStatusCode)
         {

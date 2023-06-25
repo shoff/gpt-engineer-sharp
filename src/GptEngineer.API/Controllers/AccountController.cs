@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-[Route("api/v1/[controller]")]
+[Route("api/v1/account")]
 public class AccountController : ControllerBase
 {
     private readonly ILogger<AccountController> logger;
@@ -16,11 +16,11 @@ public class AccountController : ControllerBase
         this.logger = logger;
     }
 
-    [HttpGet("Login")]
+    [HttpGet("login")]
     [AllowAnonymous]
     public ActionResult Login(string returnUrl)
     {
-        this.logger.LogDebug("Account/Login?returnUrl={ReturnUrl}", returnUrl);
+        this.logger.LogDebug("api/v1/account/login?returnUrl={ReturnUrl}", returnUrl);
         var challenge = Challenge(new AuthenticationProperties
         {
             RedirectUri = !string.IsNullOrEmpty(returnUrl) ? returnUrl : "/"
@@ -30,7 +30,7 @@ public class AccountController : ControllerBase
 
     [ValidateAntiForgeryToken]
     [Authorize]
-    [HttpPost("Logout")]
+    [HttpPost("logout")]
     public IActionResult Logout() => SignOut(new AuthenticationProperties
         {
             RedirectUri = "/"
