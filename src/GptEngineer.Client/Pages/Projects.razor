@@ -3,8 +3,8 @@
 @using GptEngineer.Core.Projects
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@inject ILogService logService;
 @inject IAntiforgeryHttpClientFactory HttpClientFactory
-@attribute [AllowAnonymous]
 
 <PageTitle>GPT Engineer Projects</PageTitle>
 <MudContainer>
@@ -59,10 +59,11 @@
 
     private async Task SubmitAsync()
     {
+        await this.logService.LogError("Does this work?");
         Console.WriteLine("SubmitAsync called");
         this.selectedProjectName = textInput;
         using var client = await HttpClientFactory.CreateClientAsync();
-        var result = await client.GetAsync("https://localhost:7003/api/v1/project");
+        var result = await client.GetAsync("/api/v1/project");
         if (result.IsSuccessStatusCode)
         {
             var pr = await result.Content.ReadFromJsonAsync<IAsyncEnumerable<Project>>();

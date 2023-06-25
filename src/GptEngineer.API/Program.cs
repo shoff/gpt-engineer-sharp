@@ -1,5 +1,6 @@
 namespace GptEngineer.API;
 
+using GptEngineer.API.Hubs;
 using GptEngineer.Infrastructure;
 using GptEngineer.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
@@ -31,9 +32,11 @@ public static class Program
             .SetupSecurity()
             .AddControllersWithViews(options =>
                 options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
+
         IdentityModelEventSource.ShowPII = true;
 
         var app = builder.Build();
+        app.UseResponseCompression();
 
         // again no easy way to separate this!
         app.UseSerilogRequestLogging();
@@ -61,6 +64,7 @@ public static class Program
         app.UseAuthorization();
         app.MapRazorPages();
         app.MapControllers();
+        app.MapHub<ChatHub>("/chathub");
         app.MapFallbackToPage("/_Host");
         app.Run();
     }

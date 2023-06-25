@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.ResponseCompression;
 
 namespace GptEngineer.Infrastructure;
 
@@ -55,6 +57,12 @@ public static class Ioc
                 .RequireAuthenticatedUser()
                 .Build();
             options.Filters.Add(new AuthorizeFilter(policy));
+        });
+        services.AddSignalR();
+        services.AddResponseCompression(opts =>
+        {
+            opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+                new[] { "application/octet-stream" });
         });
         // this might need to go on the API
         services.AddSingleton<IProjectFactory, ProjectFactory>();

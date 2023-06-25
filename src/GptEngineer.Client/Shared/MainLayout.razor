@@ -7,7 +7,11 @@
 <MudLayout>
     <MudAppBar Elevation="0">
 
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton 
+            Icon="@Icons.Material.Filled.Menu" 
+            Color="Color.Inherit" 
+            Edge="Edge.Start" 
+            OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
         <AuthorizeView>
             <Authorized>
@@ -17,8 +21,9 @@
 
                 <span class="pad-right">
                     <form method="post" action="@LOGIN">
-                        <AntiForgeryTokenInput />
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" typeof="submit">Sign out</MudButton>
+                        <AntiForgeryTokenInput></AntiForgeryTokenInput>
+                        <MudButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" typeof="submit">Sign out</MudButton>
                     </form>
                 </span>
             </Authorized>
