@@ -20,7 +20,10 @@
             </MudSelect>
         </MudItem>
         <MudItem>
-            <MudButton OnClick="@SubmitAsync" Variant="Variant.Filled" Color="Color.Primary">Submit</MudButton>
+            <MudButton
+                OnClick="@SubmitAsync" 
+                Variant="Variant.Filled" 
+                Color="Color.Primary">Submit</MudButton>
         </MudItem>
     </MudForm>
     <MudTextField Label="Streaming Content" @bind-Value="content" Lines="4" Variant="Variant.Outlined" />
@@ -57,7 +60,7 @@
     {
         this.selectedProjectName = textInput;
         using var client = await HttpClientFactory.CreateClientAsync();
-        var result = await client.GetAsync("api/v1/projects");
+        var result = await client.GetAsync("https://localhost:7003/api/v1/project");
 
         if (result.IsSuccessStatusCode)
         {
