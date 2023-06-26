@@ -6,12 +6,15 @@ using Microsoft.Extensions.Logging;
 public class ProjectService : IProjectService
 {
     private readonly IProjectFactory projectFactory;
+    private readonly IFileSystem fileSystem;
 
     public ProjectService(
         ILogger<ProjectService> logger,
-        IProjectFactory projectFactory)
+        IProjectFactory projectFactory,
+        IFileSystem fileSystem)
     {
         this.projectFactory = projectFactory;
+        this.fileSystem = fileSystem;
     }
 
     public async Task<IEnumerable<Project>> GetProjectsAsync(string? projectDirectoryPath = null)
@@ -19,6 +22,7 @@ public class ProjectService : IProjectService
         // HACK
         var projects = new List<Project>();
         projectDirectoryPath ??= @"../../../../../projects";
+
         var enumerationOptions = new EnumerationOptions()
         {
             MatchCasing = MatchCasing.CaseInsensitive,
@@ -29,7 +33,7 @@ public class ProjectService : IProjectService
         try
         {
             // should contain top-level project directories
-            var projectDirectories = Directory.GetDirectories(projectDirectoryPath, "*", enumerationOptions);
+            var projectDirectories = this.fileSystem.GetDirectories(projectDirectoryPath, "*", enumerationOptions);
 
             foreach (var projectDirectory in projectDirectories)
             {

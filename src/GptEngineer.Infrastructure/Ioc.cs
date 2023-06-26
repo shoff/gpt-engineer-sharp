@@ -38,6 +38,7 @@ public static class Ioc
                 ?? throw new InvalidOperationException();
         });
         // this might need to go on the API
+        services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IProjectFactory, ProjectFactory>();
         services.AddSingleton<IProjectService, ProjectService>();
         services.AddTransient<ISteps, Steps>();
