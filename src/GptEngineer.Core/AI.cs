@@ -131,13 +131,14 @@ public class AI : IAI
 
         this.logger.LogInformation("Creating a new chat completion: {Messages}", messages);
 
-        var x = messages.Select(m => new GptMessage
+        var gptMessages = messages.Select(m => new GptMessage
         {
             Role = m[ROLE],
             Content = m[CONTENT]
         }).ToList();
 
-        var messageList = x.Select(message => new ChatMessage(message.Role!, message.Content!)).ToList();
+        var messageList = gptMessages.Select(
+            message => new ChatMessage(message.Role!, message.Content!)).ToList();
 
         var completionResult = this.openAIService.ChatCompletion.CreateCompletionAsStream(
             new ChatCompletionCreateRequest
@@ -184,7 +185,4 @@ public class AI : IAI
         return messages;
     }
 
-    public void Dispose()
-    {
-    }
 }

@@ -46,7 +46,7 @@ public static class Ioc
         });
 
         services.AddAntiforgery(options =>
-        {
+        { 
             options.HeaderName = HEADER_NAME;
             options.Cookie.Name = COOKIE_NAME;
             options.Cookie.SameSite = SameSiteMode.Strict;
@@ -69,10 +69,10 @@ public static class Ioc
         // this might need to go on the API
         services.AddSingleton<IProjectFactory, ProjectFactory>();
         services.AddSingleton<IProjectService, ProjectService>();
-        services.AddTransient<ISteps, Steps>();
-        services.AddTransient<IStepRunner, StepRunner>();
-        services.AddTransient<IDataStores, DataStores>();
-        services.AddTransient<IAI, AI>();
+        services.AddScoped<ISteps, Steps>();
+        services.AddScoped<IStepRunner, StepRunner>();
+        services.AddScoped<IDataStores, DataStores>();
+        services.AddScoped<IAI, AI>();
         return services;
     }
 }

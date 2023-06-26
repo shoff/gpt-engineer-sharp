@@ -70,6 +70,7 @@ public class ChatHub : Hub
         this.project = await this.projectFactory.GetAsync(projectName);
         var projectInformation = new ProjectInformation(this.project.Name,
             this.project.HasWorkspace ? this.project.Workspace.FileList.Count : 0);
+
         var message = $"Successfully loaded {projectInformation}.";
         await this.Clients.Caller.SendAsync(PROJECT_LOADED, message);
     }
@@ -78,8 +79,15 @@ public class ChatHub : Hub
     {
         foreach (var step in this.stepRunner.Default)
         {
-            var messages = await step();
-            this.dataStores.Logs[step.GetType().Name] = JsonSerializer.Serialize(messages);
+            try
+            {
+                var messages = await step();
+                this.dataStores.Logs[step.GetType().Name] = JsonSerializer.Serialize(messages);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError("{Message}", ex.Message);
+            }
         }
 
         if (string.IsNullOrWhiteSpace(message))

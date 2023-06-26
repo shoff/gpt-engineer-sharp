@@ -2,7 +2,6 @@
 @inject NavigationManager Navigation
 @inject GlobalStateService StateService
 @inject IJSRuntime JSRuntime
-@inject StreamService StreamService
 @inject ChatHubService ChatHubService
 @using Microsoft.AspNetCore.SignalR.Client
 
@@ -19,7 +18,7 @@
         </MudItem>
         <MudItem>
             <input type="hidden" id="user" value="@StateService.UserDisplayName" />
-            <MudButton OnClick="Send" Disabled="@(!IsConnected)" Color="Color.Primary">Send</MudButton>
+            <MudButton OnClick="Send" Disabled="@(!IsConnected)" ButtonType="ButtonType.Button" Color="Color.Primary">Send</MudButton>
         </MudItem>
     </MudForm>
 </MudPaper>
@@ -34,17 +33,6 @@
         </MudList>
     </MudItem>
 </MudPaper>
-<MudPaper>
-
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@StartStream">
-        Start Stream
-    </MudButton>
-</MudPaper>
-
-@foreach (var number in numbers)
-{
-    <MudText>@number</MudText>
-}
 
 @if (!this.connectionOn)
 {
@@ -68,15 +56,17 @@
     protected override async Task OnInitializedAsync()
     {
         this.userInput = this.StateService.UserDisplayName;
-        
-        // TOD put this into a service 
+
+        // TOD put this into a service
         this.hubConnection = ChatHubService.GetHubConnection();
         if (hubConnection is null)
         {
             this.connectionOn = false;
+            StateHasChanged();
             return;
         }
         this.connectionOn = true;
+        
         this.hubConnection.On<string>(PROJECT_LOADED, (message) =>
         {
             messages.Add(message);
@@ -89,6 +79,7 @@
             messages.Add(encodedMsg);
             StateHasChanged();
         });
+
         await this.hubConnection.StartAsync();
         await this.hubConnection.SendAsync(START_PROJECT, "hangman");
     }
@@ -123,20 +114,8 @@
         await JSRuntime.InvokeVoidAsync("scrollToBottomIfNeeded", "conversation");
     }
 
-
-    private readonly List<int> numbers = new List<int>();
-
-    private async Task StartStream()
-    {
-        await foreach (var number in StreamService.GetStream())
-        {
-            numbers.Add(number);
-            StateHasChanged(); // Trigger UI update
-        }
-    }
-
-        private const string START_PROJECT = "StartProject";
-        private const string PROJECT_LOADED = "ProjectLoaded";
-        private const string RECEIVE_MESSAGE = "ReceiveMessage";
-        private const string SEND_MESSAGE = "SendMessage";
+    private const string START_PROJECT = "StartProject";
+    private const string PROJECT_LOADED = "ProjectLoaded";
+    private const string RECEIVE_MESSAGE = "ReceiveMessage";
+    private const string SEND_MESSAGE = "SendMessage";
 }

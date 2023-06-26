@@ -8,7 +8,7 @@
 }
 .conversation {
     display: flex;
-    align-items: flex-end; /* align text to the top */
+    align-items: flex-start; /* align text to the top */
     min-height: 200px; /* set a minimum height */
     max-height: 300px; /* set a maximum height */
     overflow: auto; /* add scrollbars if content overflows */

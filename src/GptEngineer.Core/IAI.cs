@@ -2,7 +2,7 @@
 
 namespace GptEngineer.Core;
 
-public interface IAI : IDisposable
+public interface IAI 
 {
     Task<List<Dictionary<string, string>>> Start(string system, string user);
     Dictionary<string, string> AsSystemRole(string msg);

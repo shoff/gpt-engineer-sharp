@@ -32,6 +32,7 @@ public class DataStore
             string fullPath = Path.Combine(this.path, key);
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath) ?? throw new InvalidOperationException());
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (value != null)
             {
                 File.WriteAllText(fullPath, value, Encoding.UTF8);

@@ -7,11 +7,14 @@ using System.Text.RegularExpressions;
 
 public class Steps : ISteps
 {
-    private const string GEN_SPEC_MESSAGE = "Based on the conversation so far, please reiterate the specification for "
-                                            + "the program. If there are things that can be improved, please incorporate the "
-                                            + "improvements. If you are satisfied with the specification, just write out the "
-                                            + "specification word by word again.";
-
+    private const string GEN_SPEC_MESSAGE = "Based on the conversation so far, please reiterate the specification for the program. If there are things that can be improved, please incorporate the improvements. If you are satisfied with the specification, just write out the specification word by word again.";
+    private const string SPECIFICATION = "specification";
+    private const string MAIN_PROMPT = "main_prompt";
+    private const string SPEC = "spec";
+    private const string CONTENT = "content";
+    private const string RESPEC = "respec";
+    private const string UNIT_TESTS = "unit_tests";
+    private const string USE_QA = "use_qa";
     private readonly IDataStores dbs;
     private readonly IAI ai;
     private static readonly Regex regex = new(@"(\S+?)\n```\S+\n(.+?)```", RegexOptions.Compiled);
@@ -30,30 +33,31 @@ public class Steps : ISteps
     public async Task<List<Dictionary<string, string>>> SimpleGen()
     {
         // Run the AI on the main prompt and save the results
-        List<Dictionary<string, string>> messages = await this.ai.Start(this.SetupSysPrompt(), this.dbs.Input["main_prompt"]);
-        this.ToFiles(messages.Last()["content"], this.dbs.Workspace);
+        List<Dictionary<string, string>> messages = await this.ai.Start(this.SetupSysPrompt(), this.dbs.Input[MAIN_PROMPT]);
+        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
         return messages;
     }
     
     public async Task<List<Dictionary<string, string>>> Clarify()
     {
+        // TODO This is clearly incorrect 
         var messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.dbs.Identity["qa"])
         };
-        var user = this.dbs.Input["main_prompt"]; // user is the main prompt
+        var user = this.dbs.Input[MAIN_PROMPT]; // user is the main prompt
 
         while (true)
         {
             var next = await this.ai.NextAsync(messages, user);
-            if (messages.Last()["content"].Trim().ToLower().StartsWith("no"))
+            if (messages.Last()[CONTENT].Trim().ToLower().StartsWith("no"))
             {
                 break;
             }
 
-            Console.WriteLine();
-            user = Console.ReadLine();
-            Console.WriteLine();
+            //Console.WriteLine();
+            //user = Console.ReadLine();
+            //Console.WriteLine();
 
             if (string.IsNullOrEmpty(user) || user == "q")
             {
@@ -68,8 +72,6 @@ public class Steps : ISteps
                 + "If everything is sufficiently clear, only answer `no`."
             );
         }
-
-        Console.WriteLine();
         return messages;
     }
 
@@ -79,11 +81,11 @@ public class Steps : ISteps
         var messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()),
-            this.ai.AsSystemRole($"Instructions: {this.dbs.Input["main_prompt"]}")
+            this.ai.AsSystemRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}")
         };
 
-        messages = await this.ai.NextAsync(messages, this.dbs.Identity["spec"]);
-        this.dbs.Memory["specification"] = messages.Last()["content"];
+        messages = await this.ai.NextAsync(messages, this.dbs.Identity[SPEC]);
+        this.dbs.Memory[SPECIFICATION] = messages.Last()[CONTENT];
         return messages;
     }
 
@@ -96,7 +98,7 @@ public class Steps : ISteps
         
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.dbs.Identity["respec"])
+            this.ai.AsSystemRole(this.dbs.Identity[RESPEC])
         };
         messages = await this.ai.NextAsync(messages);
         messages = await this.ai.NextAsync(
@@ -107,7 +109,7 @@ public class Steps : ISteps
         );
 
 
-        this.dbs.Memory["specification"] = messages.Last()["content"];
+        this.dbs.Memory[SPECIFICATION] = messages.Last()[CONTENT];
         return messages;
     }
 
@@ -115,12 +117,12 @@ public class Steps : ISteps
     {
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory["specification"]}")
+            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}")
         };
 
-        messages = await this.ai.NextAsync(messages, this.dbs.Identity["unit_tests"]);
-        this.dbs.Memory["unit_tests"] = messages.Last()["content"];
-        this.ToFiles(this.dbs.Memory["unit_tests"], this.dbs.Workspace);
+        messages = await this.ai.NextAsync(messages, this.dbs.Identity[UNIT_TESTS]);
+        this.dbs.Memory[UNIT_TESTS] = messages.Last()[CONTENT];
+        this.ToFiles(this.dbs.Memory[UNIT_TESTS], this.dbs.Workspace);
         return messages;
     }
 
@@ -134,9 +136,9 @@ public class Steps : ISteps
             this.ai.AsSystemRole(this.SetupSysPrompt()),
         }.Concat(messages.Skip(1)).ToList();
 
-        messages = await this.ai.NextAsync(messages, this.dbs.Identity["use_qa"]);
+        messages = await this.ai.NextAsync(messages, this.dbs.Identity[USE_QA]);
 
-        this.ToFiles(messages.Last()["content"], this.dbs.Workspace);
+        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
         return messages;
     }
 
@@ -145,13 +147,13 @@ public class Steps : ISteps
         var messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()),
-            this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"),
-            this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory["specification"]}"), 
-            this.ai.AsUserRole($"Unit tests:\n\n{this.dbs.Memory["unit_tests"]}")
+            this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"),
+            this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}"), 
+            this.ai.AsUserRole($"Unit tests:\n\n{this.dbs.Memory[UNIT_TESTS]}")
         };
 
-        messages = await this.ai.NextAsync(messages, this.dbs.Identity["use_qa"]);
-        this.ToFiles(messages.Last()["content"], this.dbs.Workspace);
+        messages = await this.ai.NextAsync(messages, this.dbs.Identity[USE_QA]);
+        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
         return messages;
     }
 
@@ -166,14 +168,15 @@ public class Steps : ISteps
         Console.WriteLine("If yes, press enter. Otherwise, type \"no\"");
         Console.WriteLine();
 
-        if (!string.IsNullOrEmpty(Console.ReadLine()))
-        {
-            Console.WriteLine("Ok, not executing the code.");
-            return new List<Dictionary<string, string>>();
-        }
+        // TODO NFI how to implement this the way the code is written
+        //if (!string.IsNullOrEmpty(Console.ReadLine()))
+        //{
+        //    Console.WriteLine("Ok, not executing the code.");
+        //    return new List<Dictionary<string, string>>();
+        //}
 
-        Console.WriteLine("Executing the code...");
-        Console.WriteLine();
+        //Console.WriteLine("Executing the code...");
+        //Console.WriteLine();
 
         // TODO should be configurable
         await Process.Start(new ProcessStartInfo
@@ -190,21 +193,21 @@ public class Steps : ISteps
     {
         var command = this.dbs.Workspace["run.bat"];
 
-        Console.WriteLine("Do you want to execute this code?");
-        Console.WriteLine();
-        Console.WriteLine(command);
-        Console.WriteLine();
-        Console.WriteLine("If yes, press enter. Otherwise, type \"no\"");
-        Console.WriteLine();
+        //Console.WriteLine("Do you want to execute this code?");
+        //Console.WriteLine();
+        //Console.WriteLine(command);
+        //Console.WriteLine();
+        //Console.WriteLine("If yes, press enter. Otherwise, type \"no\"");
+        //Console.WriteLine();
 
-        if (!string.IsNullOrEmpty(Console.ReadLine()))
-        {
-            Console.WriteLine("Ok, not executing the code.");
-            return new List<Dictionary<string, string>>();
-        }
+        //if (!string.IsNullOrEmpty(Console.ReadLine()))
+        //{
+        //    Console.WriteLine("Ok, not executing the code.");
+        //    return new List<Dictionary<string, string>>();
+        //}
 
-        Console.WriteLine("Executing the code...");
-        Console.WriteLine();
+        //Console.WriteLine("Executing the code...");
+        //Console.WriteLine();
 
         // TODO should be configurable
         await Process.Start(new ProcessStartInfo
@@ -229,10 +232,10 @@ public class Steps : ISteps
             "Do not explain the code, just give the commands.",
             user: "Information about the codebase:\n\n" + this.dbs.Workspace["all_output.txt"]
         );
-        Console.WriteLine();
+        // Console.WriteLine();
         
         var regex = new Regex(@"```\S*\n(.+?)```", RegexOptions.Singleline); // huh?
-        var matches = regex.Matches(messages.Last()["content"]);
+        var matches = regex.Matches(messages.Last()[CONTENT]);
         this.dbs.Workspace["run.bat"] = string.Join("\n", matches.Select(match => match.Groups[1].Value));
         return messages;
     }
@@ -241,24 +244,24 @@ public class Steps : ISteps
     {
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.AsAssistantRole(this.dbs.Workspace["all_output.txt"]), this.ai.AsSystemRole(this.dbs.Identity["use_feedback"])
+            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsAssistantRole(this.dbs.Workspace["all_output.txt"]), this.ai.AsSystemRole(this.dbs.Identity["use_feedback"])
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Memory["feedback"]);
-        this.ToFiles(messages.Last()["content"], this.dbs.Workspace);
+        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
         return messages;
     }
 
     public async Task<List<Dictionary<string, string>>> FixCode()
     {
-        var codeOutput = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.GenCode)]).Last()["content"];
+        var codeOutput = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.GenCode)]).Last()[CONTENT];
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input["main_prompt"]}"), this.ai.AsUserRole(codeOutput), this.ai.AsSystemRole(this.dbs.Identity["fix_code"])
+            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsUserRole(codeOutput), this.ai.AsSystemRole(this.dbs.Identity["fix_code"])
         };
 
         messages = await this.ai.NextAsync(messages, "Please fix any errors in the code above.");
-        this.ToFiles(messages.Last()["content"], this.dbs.Workspace);
+        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
         return messages;
     }
     
