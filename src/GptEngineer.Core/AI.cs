@@ -112,11 +112,12 @@ public class AI : IAI
             if (completion.Successful)
             {
                 var chunk = completion.Choices.Select(chunk => chunk.Delta.Content);
-                if (chunk?.Any() != true)
+                var enumerable = chunk as string[] ?? chunk.ToArray();
+                if (enumerable?.Any() != true)
                 {
-                    return messages;
+                    return messages ?? new List<Dictionary<string, string>>();
                 }
-                chat.AddRange(chunk);
+                chat.AddRange(enumerable);
                 messageDictionaryList.Add(new Dictionary<string, string>
                     { { ROLE, ASSISTANT }, { CONTENT, string.Join("", chat) } });
 
