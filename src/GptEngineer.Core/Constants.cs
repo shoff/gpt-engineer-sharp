@@ -9,6 +9,11 @@ public static class Constants
     public const string ROOT_COMPONENT = "#app";
     public const string DEFAULT = "default";
 
+    // network stuffs
+    public const string APPLICATION_OCTET_STREAM = "application/octet-stream";
+
+
+
     // auth
     public const string AUTHORIZED_CLIENT_NAME = "authorizedClient";
     public const string LOG_IN_PATH = "LogInPath";
@@ -26,6 +31,9 @@ public static class Constants
     public const string ERROR = "Error";
     public const string FATAL = "Fatal";
 
+    // environment variables
+    public const string OPENAI_API_KEY = "OPENAI_API_KEY";
+    
     // configuration
     public const string GPT_OPTIONS = "GptOptions";
     public const string AI_OPTIONS = "AIOptions";

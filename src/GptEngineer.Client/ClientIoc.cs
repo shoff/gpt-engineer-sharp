@@ -1,29 +1,23 @@
-﻿using Blazored.LocalStorage;
+﻿namespace GptEngineer.Client;
+using Blazored.LocalStorage;
+using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
 
-namespace GptEngineer.Client;
-
-using Core.Projects;
-
-public static class Ioc
+public static class ClientIoc
 {
     public static WebAssemblyHostBuilder ConfigureOptions(this WebAssemblyHostBuilder builder)
     {
         builder.Services.AddOptions();
-        // builder.SetupLogging((IConfiguration)builder.Configuration);
         return builder;
     }
 
     public static WebAssemblyHostBuilder RegisterDependencies(this WebAssemblyHostBuilder builder)
     {
-
-#if !DEBUG
-            builder.Services.AddAuthorizationCore();
-            builder.Services.TryAddSingleton<AuthenticationStateProvider, HostAuthenticationStateProvider>();
-            builder.Services.TryAddSingleton(sp => (HostAuthenticationStateProvider)sp.GetRequiredService<AuthenticationStateProvider>());
-            builder.Services.AddTransient<AuthorizedHandler>();
-#endif
-
+        builder.Services.AddAuthorizationCore();
+        builder.Services.AddScoped<GlobalStateService>();
+        builder.Services.TryAddSingleton<AuthenticationStateProvider, HostAuthenticationStateProvider>();
+        builder.Services.TryAddSingleton(sp => (HostAuthenticationStateProvider)sp.GetRequiredService<AuthenticationStateProvider>());
+        builder.Services.AddTransient<AuthorizedHandler>();
         builder.Services.AddHttpClient(DEFAULT, client =>
         {
             client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
@@ -36,8 +30,8 @@ public static class Ioc
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(APPLICATION_JSON));
         }).AddHttpMessageHandler<AuthorizedHandler>();
 
-
-
+        builder.Services.AddScoped<StreamService>();
+        builder.Services.AddScoped<ChatHubService>();
         builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(DEFAULT));
         builder.Services.AddTransient<IAntiforgeryHttpClientFactory, AntiforgeryHttpClientFactory>();
         builder.Services.AddMudServices();
@@ -45,4 +39,5 @@ public static class Ioc
         builder.Services.AddBlazoredLocalStorage();
         return builder;
     }
+
 }

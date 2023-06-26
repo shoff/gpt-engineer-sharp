@@ -6,41 +6,55 @@ using System.IO;
 public class Project
 {
     private const string MEMORY = "/memory";
-    private const string WORKSPACE = "/workspace";
+    private const string  WORKSPACE = "/workspace";
 
     public Project(string projectDirectory)
     {
         ArgumentException.ThrowIfNullOrEmpty(projectDirectory, nameof(projectDirectory));
-        Path = projectDirectory;
-        Name = System.IO.Path.GetDirectoryName(projectDirectory) ?? "Could not read directory name!";
-        Memory = new(Path + MEMORY);
+        this.Path = projectDirectory;
+        CreateIfNotExists(this.Path);
+        this.Name = System.IO.Path.GetDirectoryName(projectDirectory) ?? "Could not read directory name!";
+        this.Memory = new Memory($"{this.Path}{MEMORY}");
+        this.Workspace = new Workspace($"{this.Path}{WORKSPACE}");
     }
 
-    public bool HasWorkspace => Directory.Exists(Path + WORKSPACE);
-    public bool HasMemory => Directory.Exists(Path + MEMORY);
+    public bool HasWorkspace => Directory.Exists(this.Path + WORKSPACE);
+    public bool HasMemory => Directory.Exists(this.Path + MEMORY);
     public string Name { get; init; }
     public string? Path { get; init; }
     public string Description { get; set; } = string.Empty;
-
-    public Workspace Workspace { get; } = new();
+    public Workspace Workspace { get; }
     public Memory Memory { get; }
-
-    public string MemoryPath => Path + MEMORY;
-    public string WorkspacePath => Path + WORKSPACE;
-
+    public string MemoryPath => this.Path + MEMORY;
+    public string WorkspacePath => this.Path + WORKSPACE;
+    public ICollection<string> Errors => new HashSet<string>();
     public async Task LoadAsync()
     {
-        if (HasWorkspace)
+        if (this.HasWorkspace)
         {
-            await Workspace.FillAsync(Path + WORKSPACE);
+            await this.Workspace.FillAsync(this.Path + WORKSPACE);
         }
 
-        if (Memory.HasLogs)
+        if (this.Memory.HasLogs)
         {
-            await Memory.Log.FillAsync(Memory.Path + "/logs");
+            await this.Memory.GptLog.FillAsync(this.Memory.Path + "/logs");
         }
 
-        await Memory.FillAsync(Memory.Path + "/specification");
-        await Memory.FillAsync(Memory.Path + "/unit_test");
+        await this.Memory.FillAsync(this.Memory.Path + "/specification");
+        await this.Memory.FillAsync(this.Memory.Path + "/unit_test");
+    }
+    private void CreateIfNotExists(string path)
+    {
+        if (!Directory.Exists(path))
+        {
+            try
+            {
+                Directory.CreateDirectory(path);
+            }
+            catch (Exception e)
+            {
+                this.Errors.Add(e.Message);
+            }
+        }
     }
 }

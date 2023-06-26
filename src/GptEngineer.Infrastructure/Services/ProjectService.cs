@@ -1,7 +1,7 @@
-﻿namespace GptEngineer.Client.Services;
-
-using Core.Projects;
+﻿using GptEngineer.Core.Projects;
 using Microsoft.Extensions.Logging;
+
+namespace GptEngineer.Infrastructure.Services;
 
 public class ProjectService : IProjectService
 {
@@ -37,7 +37,7 @@ public class ProjectService : IProjectService
 
             foreach (var projectDirectory in projectDirectories)
             {
-                var project = await this.projectFactory.CreateAsync(projectDirectory);
+                var project = await this.projectFactory.GetAsync(projectDirectory);
                 projects.Add(project);
             }
         }

@@ -4,6 +4,12 @@ using System.Text.Json;
 
 public class GptLog
 {
+    public GptLog(string path)
+    {
+        this.Path = path;
+        CreateIfNotExists(path);
+    }
+    
     public async Task FillAsync(string logDirectory)
     {
         var enumerationOptions = new EnumerationOptions()
@@ -38,6 +44,23 @@ public class GptLog
             }
         }
     }
+    public string Path { get; set; }
     public ICollection<GptMessage> Clarifications { get; } = new List<GptMessage>();
     public ICollection<GptMessage> ClarificationsRan { get; } = new List<GptMessage>();
+    public ICollection<string> Errors => new HashSet<string>();
+
+    private void CreateIfNotExists(string path)
+    {
+        if (!Directory.Exists(path))
+        {
+            try
+            {
+                Directory.CreateDirectory(path);
+            }
+            catch (Exception e)
+            {
+                this.Errors.Add(e.Message);
+            }
+        }
+    }
 }

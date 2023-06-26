@@ -3,32 +3,39 @@
 <MudThemeProvider @ref="@mudThemeProvider" @bind-IsDarkMode="@isDarkMode" Theme="theme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
+@inject GlobalStateService StateService
 
 <MudLayout>
     <MudAppBar Elevation="0">
-
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                       Color="Color.Inherit"
+                       Edge="Edge.Start"
+                       OnClick="@((e) => DrawerToggle())" />
         <MudSpacer />
-@*        <AuthorizeView>
+        <AuthorizeView>
             <Authorized>
                 <span class="pad-right">
+                    @{
+                        this.StateService.UserDisplayName = @context?.User?.Identity?.Name!;
+                    }
                     <strong>Hello, @context?.User?.Identity?.Name!</strong>
                 </span>
 
                 <span class="pad-right">
                     <form method="post" action="@LOGIN">
-                        <AntiForgeryTokenInput />
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" typeof="submit">Sign out</MudButton>
+                        <AntiForgeryTokenInput></AntiForgeryTokenInput>
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary" typeof="submit">Sign out</MudButton>
                     </form>
                 </span>
             </Authorized>
             <NotAuthorized>
                 <a href="@LOGIN">Log in</a>
             </NotAuthorized>
-        </AuthorizeView>*@
+        </AuthorizeView>
         <MudImage Src="images/gpt-engineer-brain.png" Alt="logo" Elevation="25" Class="rounded-lg" Height="60" />
-        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Error" Link="https://mudblazor.com/" Target="_blank" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Warning" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
+        <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Error" Href="https://mudblazor.com/" Target="_blank" />
+        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Warning" Href="https://github.com/MudBlazor/MudBlazor/" Target="_blank" />
     </MudAppBar>
     <MudDrawer @bind-Open="drawerOpen" Elevation="1">
         <MudDrawerHeader>
@@ -40,7 +47,6 @@
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
             <MudSwitch @bind-Checked="@isDarkMode" Color="Color.Primary" T="bool" Label="Toggle Light/Dark Mode" />
-
             @Body
         </MudContainer>
     </MudMainContent>
@@ -48,7 +54,7 @@
 
 
 @code {
-    private const string LOGIN = "api/v1/Account/Login";
+    private const string LOGIN = "api/v1/account/login";
     private MudThemeProvider mudThemeProvider = null!;
     private readonly MudTheme theme = new();
     private bool isDarkMode;

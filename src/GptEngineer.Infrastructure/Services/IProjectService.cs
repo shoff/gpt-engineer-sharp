@@ -1,7 +1,6 @@
-﻿namespace GptEngineer.Client.Services;
+﻿using GptEngineer.Core.Projects;
 
-using Core;
-using GptEngineer.Core.Projects;
+namespace GptEngineer.Infrastructure.Services;
 
 public interface IProjectService
 {

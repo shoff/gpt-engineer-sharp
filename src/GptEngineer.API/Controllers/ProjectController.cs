@@ -1,4 +1,7 @@
-﻿namespace GptEngineer.API.Controllers;
+﻿using GptEngineer.Infrastructure.Services;
+using Microsoft.AspNetCore.Authorization;
+
+namespace GptEngineer.API.Controllers;
 
 using Client.Services;
 using Core.Configuration;
@@ -7,7 +10,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-[Route("api/v1/[controller]")]
+[Route("api/v1/project")]
 public class ProjectController : ControllerBase
 {
     private readonly ILogger<ProjectController> logger;
@@ -25,7 +28,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet]
-    public async IAsyncEnumerable<Project> GetAsync(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<Project> GetAsync()
     {
         var directory = this.options.Value.ProjectPath;
 

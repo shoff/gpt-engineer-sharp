@@ -65,7 +65,7 @@ public static class WebBuilderExtensions
             if (sslCert is not null)
             {
                 var httpsPort = hostOptions?.HttpsPort > 0 ?
-                    hostOptions.HttpsPort : 7001;
+                    hostOptions.HttpsPort : 7003;
 
                 options.ListenAnyIP(httpsPort, listenOpt =>
                 {
@@ -78,7 +78,7 @@ public static class WebBuilderExtensions
             }
 
             var httpPort = hostOptions?.HttpPort > 0 ?
-                hostOptions.HttpPort : 7000;
+                hostOptions.HttpPort : 7002;
 
             options.ListenAnyIP(httpPort, listenOpt =>
             {

@@ -102,3 +102,31 @@ a, .btn-link {
 .brand {
   display: inline-block;
 }
+
+.pad-left {
+  padding-left: 1em;
+}
+
+.pad-right {
+  padding-right: 1em;
+}
+
+.hidden {
+  display: none;
+}
+
+.chat-dialog {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.chat-user-dialog {
+  width: 400px;
+}
+
+.conversation {
+  display: flex;
+  align-items: flex-start; /* align text to the top */
+  min-height: 200px; /* set a minimum height */
+  max-height: 300px; /* set a maximum height */
+  overflow: auto; /* add scrollbars if content overflows */
+}

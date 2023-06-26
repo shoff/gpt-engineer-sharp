@@ -1,14 +1,121 @@
 ﻿@page "/"
+@inject NavigationManager Navigation
+@inject GlobalStateService StateService
+@inject IJSRuntime JSRuntime
+@inject ChatHubService ChatHubService
+@using Microsoft.AspNetCore.SignalR.Client
 
 <PageTitle>GptEngineer Sharp</PageTitle>
-<MudText Typo="Typo.h3" GutterBottom="true">About Us</MudText>
+<MudText Typo="Typo.h3" GutterBottom="true">Alpha: Chat to code</MudText>
 
-<MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
-    Stuff goes here
-
+<MudPaper Class="chat-user-dialog">
+    <MudForm>
+        <MudItem Class="pad-left">
+            <MudTextField @bind-Value="@this.StateService.UserDisplayName" />
+        </MudItem>
+        <MudItem Class="pad-left">
+            <MudTextField Label="Message:" @bind-Value="messageInput" Adornment="Adornment.End" Lines="1"></MudTextField>
+        </MudItem>
+        <MudItem>
+            <input type="hidden" id="user" value="@StateService.UserDisplayName" />
+            <MudButton OnClick="Send" Disabled="@(!IsConnected)" ButtonType="ButtonType.Button" Color="Color.Primary">Send</MudButton>
+        </MudItem>
+    </MudForm>
 </MudPaper>
+
+<MudPaper>
+    <MudItem id="conversation" Class="chat-dialog conversation">
+        <MudList>
+            @foreach (var message in messages)
+            {
+                <MudListItem>@message</MudListItem>
+            }
+        </MudList>
+    </MudItem>
+</MudPaper>
+
+@if (!this.connectionOn)
+{
+    <MudAlert Severity="Severity.Error">
+        No AI connection is currently available
+    </MudAlert>
+}
 
 <MudAlert Severity="Severity.Normal">
     You can find documentation and examples on our website here:
     <MudLink Href="https://mudblazor.com" Typo="Typo.body2" Color="Color.Inherit"><b>www.mudblazor.com</b></MudLink>
 </MudAlert>
+
+@code {
+    private HubConnection? hubConnection;
+    private readonly List<string> messages = new();
+    private string? userInput;
+    private string? messageInput;
+    private bool connectionOn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.userInput = this.StateService.UserDisplayName;
+
+        // TOD put this into a service
+        this.hubConnection = ChatHubService.GetHubConnection();
+        if (hubConnection is null)
+        {
+            this.connectionOn = false;
+            StateHasChanged();
+            return;
+        }
+        this.connectionOn = true;
+        
+        this.hubConnection.On<string>(PROJECT_LOADED, (message) =>
+        {
+            messages.Add(message);
+            StateHasChanged();
+        });
+
+        this.hubConnection.On<string, string>(RECEIVE_MESSAGE, (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        await this.hubConnection.StartAsync();
+        await this.hubConnection.SendAsync(START_PROJECT, "hangman");
+    }
+
+    private async Task Send()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync(SEND_MESSAGE, userInput, messageInput);
+            this.messageInput = null;
+            await ScrollToBottom();
+            this.StateHasChanged();
+        }
+        else
+        {
+            // show error message
+        }
+    }
+
+    public bool IsConnected =>
+        hubConnection?.State == HubConnectionState.Connected;
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+    private async Task ScrollToBottom()
+    {
+        await JSRuntime.InvokeVoidAsync("scrollToBottomIfNeeded", "conversation");
+    }
+
+    private const string START_PROJECT = "StartProject";
+    private const string PROJECT_LOADED = "ProjectLoaded";
+    private const string RECEIVE_MESSAGE = "ReceiveMessage";
+    private const string SEND_MESSAGE = "SendMessage";
+}
