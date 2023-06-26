@@ -68,7 +68,7 @@ public class ProjectService : IProjectService
             this.cache.TryAddToCache("projects", projects);
         }
 
-        if (projects is null or { Count: > 0 })
+        if (projects is null or { Count: 0 })
         {
             this.logger.LogError("unable to find any projects, returning empty collection");
         }
