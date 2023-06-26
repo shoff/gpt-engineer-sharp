@@ -2,11 +2,11 @@
 
 public interface IStepRunner
 {
-    List<Func<Task<List<Dictionary<string, string>>>>> Default { get; }
-    List<Func<Task<List<Dictionary<string, string>>>>> Benchmark { get; }
-    List<Func<Task<List<Dictionary<string, string>>>>> Simple { get; }
-    List<Func<Task<List<Dictionary<string, string>>>>> Clarify { get; }
-    List<Func<Task<List<Dictionary<string, string>>>>> Respec { get; }
-    List<Func<Task<List<Dictionary<string, string>>>>> ExecuteOnly { get; }
-    List<Func<Task<List<Dictionary<string, string>>>>> UseFeedback { get; }
+    IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Default { get; }
+    IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Benchmark { get; }
+    IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Simple { get; }
+    IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Clarify { get; }
+    IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Respec { get; }
+    IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> ExecuteOnly { get; }
+    IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> UseFeedback { get; }
 }

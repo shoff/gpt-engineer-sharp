@@ -3,17 +3,17 @@
 public interface ISteps
 {
     string SetupSysPrompt();
-    Task<List<Dictionary<string, string>>> SimpleGen();
-    Task<List<Dictionary<string, string>>> Clarify();
-    Task<List<Dictionary<string, string>>> GenSpec();
-    Task<List<Dictionary<string, string>>> Respec();
-    Task<List<Dictionary<string, string>>> GenUnitTests();
-    Task<List<Dictionary<string, string>>> GenClarifiedCode();
-    Task<List<Dictionary<string, string>>> GenCode();
-    Task<List<Dictionary<string, string>>> ExecuteUnitTests();
-    Task<List<Dictionary<string, string>>> ExecuteEntrypoint();
-    Task<List<Dictionary<string, string>>> GenEntrypoint();
-    Task<List<Dictionary<string, string>>> UseFeedback();
-    Task<List<Dictionary<string, string>>> FixCode();
-    List<Tuple<string, string>> ParseChat(string chat);
+    Task<IEnumerable<Dictionary<string, string>>> SimpleGen();
+    Task<IEnumerable<Dictionary<string, string>>> Clarify();
+    Task<IEnumerable<Dictionary<string, string>>> GenSpec();
+    Task<IEnumerable<Dictionary<string, string>>> Respec();
+    Task<IEnumerable<Dictionary<string, string>>> GenUnitTests();
+    Task<IEnumerable<Dictionary<string, string>>> GenClarifiedCode();
+    Task<IEnumerable<Dictionary<string, string>>> GenCode();
+    Task<IEnumerable<Dictionary<string, string>>> ExecuteUnitTests();
+    Task<IEnumerable<Dictionary<string, string>>> ExecuteEntrypoint();
+    Task<IEnumerable<Dictionary<string, string>>> GenEntrypoint();
+    Task<IEnumerable<Dictionary<string, string>>> UseFeedback();
+    Task<IEnumerable<Dictionary<string, string>>> FixCode();
+    IEnumerable<Tuple<string, string>> ParseChat(string chat);
 }

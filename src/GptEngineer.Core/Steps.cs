@@ -30,15 +30,15 @@ public class Steps : ISteps
         return this.dbs.Identity["generate"] + "\nUseful to know:\n" + this.dbs.Identity["philosophy"];
     }
 
-    public async Task<List<Dictionary<string, string>>> SimpleGen()
+    public async Task<IEnumerable<Dictionary<string, string>>> SimpleGen()
     {
         // Run the AI on the main prompt and save the results
-        List<Dictionary<string, string>> messages = await this.ai.Start(this.SetupSysPrompt(), this.dbs.Input[MAIN_PROMPT]);
+        IEnumerable<Dictionary<string, string>> messages = await this.ai.Start(this.SetupSysPrompt(), this.dbs.Input[MAIN_PROMPT]);
         this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
         return messages;
     }
     
-    public async Task<List<Dictionary<string, string>>> Clarify()
+    public async Task<IEnumerable<Dictionary<string, string>>> Clarify()
     {
         // TODO This is clearly incorrect 
         var messages = new List<Dictionary<string, string>>
@@ -75,7 +75,7 @@ public class Steps : ISteps
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> GenSpec()
+    public async Task<IEnumerable<Dictionary<string, string>>> GenSpec()
     {
         // Generate a spec from the main prompt + clarifications and save the results to the workspace
         var messages = new List<Dictionary<string, string>>
@@ -83,24 +83,27 @@ public class Steps : ISteps
             this.ai.AsSystemRole(this.SetupSysPrompt()),
             this.ai.AsSystemRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}")
         };
+        // the call to next must persist or something
+        var spec = await this.ai.NextAsync(messages, this.dbs.Identity[SPEC]);
 
-        messages = await this.ai.NextAsync(messages, this.dbs.Identity[SPEC]);
         this.dbs.Memory[SPECIFICATION] = messages.Last()[CONTENT];
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> Respec()
+    public async Task<IEnumerable<Dictionary<string, string>>> Respec()
     {
         // ReSharper disable once RedundantAssignment
         var genSpec = await this.GenSpec();
 
         var someString = this.dbs.Logs[nameof(genSpec)];
         
-        var messages = new List<Dictionary<string, string>>
+        IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.dbs.Identity[RESPEC])
         };
+       
         messages = await this.ai.NextAsync(messages);
+
         messages = await this.ai.NextAsync(
             messages,
             (
@@ -113,9 +116,9 @@ public class Steps : ISteps
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> GenUnitTests()
+    public async Task<IEnumerable<Dictionary<string, string>>> GenUnitTests()
     {
-        var messages = new List<Dictionary<string, string>>
+        IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}")
         };
@@ -126,15 +129,17 @@ public class Steps : ISteps
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> GenClarifiedCode()
+    public async Task<IEnumerable<Dictionary<string, string>>> GenClarifiedCode()
     {
-        var messages = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(
-            this.dbs.Logs[nameof(this.Clarify)]);
+        // TODO this code makes no sense at all
+        var messageList = 
+            JsonSerializer.Deserialize<List<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.Clarify)]);
 
+        IEnumerable<Dictionary<string, string>> messages = messageList;
         messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()),
-        }.Concat(messages.Skip(1)).ToList();
+        }.Concat(messages.Skip(1));
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity[USE_QA]);
 
@@ -142,9 +147,9 @@ public class Steps : ISteps
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> GenCode()
+    public async Task<IEnumerable<Dictionary<string, string>>> GenCode()
     {
-        var messages = new List<Dictionary<string, string>>
+        IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()),
             this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"),
@@ -157,7 +162,7 @@ public class Steps : ISteps
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> ExecuteUnitTests()
+    public async Task<IEnumerable<Dictionary<string, string>>> ExecuteUnitTests()
     {
         var command = this.dbs.Workspace["run.bat"];
 
@@ -172,7 +177,7 @@ public class Steps : ISteps
         //if (!string.IsNullOrEmpty(Console.ReadLine()))
         //{
         //    Console.WriteLine("Ok, not executing the code.");
-        //    return new List<Dictionary<string, string>>();
+        //    return new IEnumerable<Dictionary<string, string>>();
         //}
 
         //Console.WriteLine("Executing the code...");
@@ -189,7 +194,7 @@ public class Steps : ISteps
         return new List<Dictionary<string, string>>();
     }
 
-    public async Task<List<Dictionary<string, string>>> ExecuteEntrypoint()
+    public async Task<IEnumerable<Dictionary<string, string>>> ExecuteEntrypoint()
     {
         var command = this.dbs.Workspace["run.bat"];
 
@@ -203,7 +208,7 @@ public class Steps : ISteps
         //if (!string.IsNullOrEmpty(Console.ReadLine()))
         //{
         //    Console.WriteLine("Ok, not executing the code.");
-        //    return new List<Dictionary<string, string>>();
+        //    return new IEnumerable<Dictionary<string, string>>();
         //}
 
         //Console.WriteLine("Executing the code...");
@@ -220,9 +225,9 @@ public class Steps : ISteps
         return new List<Dictionary<string, string>>();
     }
 
-    public async Task<List<Dictionary<string, string>>> GenEntrypoint()
+    public async Task<IEnumerable<Dictionary<string, string>>> GenEntrypoint()
     {
-        List<Dictionary<string, string>> messages = await this.ai.Start(
+        IEnumerable<Dictionary<string, string>> messages = await this.ai.Start(
             system: "You will get information about a codebase that is currently on disk in the current folder.\n" +
             "From this you will answer with code blocks that include all the necessary " +
             "Unix terminal commands to:\n" +
@@ -240,9 +245,9 @@ public class Steps : ISteps
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> UseFeedback()
+    public async Task<IEnumerable<Dictionary<string, string>>> UseFeedback()
     {
-        var messages = new List<Dictionary<string, string>>
+        IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsAssistantRole(this.dbs.Workspace["all_output.txt"]), this.ai.AsSystemRole(this.dbs.Identity["use_feedback"])
         };
@@ -252,10 +257,10 @@ public class Steps : ISteps
         return messages;
     }
 
-    public async Task<List<Dictionary<string, string>>> FixCode()
+    public async Task<IEnumerable<Dictionary<string, string>>> FixCode()
     {
-        var codeOutput = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.GenCode)]).Last()[CONTENT];
-        var messages = new List<Dictionary<string, string>>
+        var codeOutput = JsonSerializer.Deserialize<IEnumerable<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.GenCode)]).Last()[CONTENT];
+        IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsUserRole(codeOutput), this.ai.AsSystemRole(this.dbs.Identity["fix_code"])
         };
@@ -275,7 +280,7 @@ public class Steps : ISteps
             workspace[fileName.Item1] = fileName.Item2;
         }
     }
-    public List<Tuple<string, string>> ParseChat(string chat)
+    public IEnumerable<Tuple<string, string>> ParseChat(string chat)
     {
         // Get all ``` blocks and preceding filenames
         var matches = regex.Matches(chat);
@@ -292,7 +297,7 @@ public class Steps : ISteps
             // Get the code
             string code = match.Groups[2].Value;
 
-            // Add the file to the list
+            // Add the file to the IEnumerable
             files.Add(new Tuple<string, string>(path, code));
         }
 

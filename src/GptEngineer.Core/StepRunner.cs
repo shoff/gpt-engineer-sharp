@@ -3,68 +3,93 @@
 public class StepRunner : IStepRunner
 {
     private readonly Steps steps;
+
     public StepRunner(IAI ai, IDataStores dbs)
     {
         this.steps = new Steps(ai, dbs);
     }
 
-    public List<Func<Task<List<Dictionary<string, string>>>>> Default =>
-        new()
+    public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Default
+    {
+        get
         {
-            this.steps.GenSpec,
-            this.steps.GenUnitTests,
-            this.steps.GenCode,
-            this.steps.GenEntrypoint,
-            this.steps.ExecuteEntrypoint
-        };
+            yield return this.steps.GenSpec;
+            yield return this.steps.GenUnitTests;
+            yield return this.steps.GenCode;
+            yield return this.steps.GenEntrypoint;
+            yield return this.steps.ExecuteEntrypoint;
+        }
+    }
+    //public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Default =>
+    //    new()
+    //    {
+    //        this.steps.GenSpec,
+    //        this.steps.GenUnitTests,
+    //        this.steps.GenCode,
+    //        this.steps.GenEntrypoint,
+    //        this.steps.ExecuteEntrypoint
+    //    };
 
-    public List<Func<Task<List<Dictionary<string, string>>>>> Benchmark =>
-        new()
+    public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Benchmark
+    {
+        get
         {
-            this.steps.GenSpec,
-            this.steps.GenUnitTests,
-            this.steps.GenCode,
-            this.steps.FixCode,
-            this.steps.GenEntrypoint
-        };
+            yield return this.steps.GenSpec;
+            yield return this.steps.GenUnitTests;
+            yield return this.steps.GenCode;
+            yield return this.steps.FixCode;
+            yield return this.steps.GenEntrypoint;
+        }
+    }
 
-    public List<Func<Task<List<Dictionary<string, string>>>>> Simple =>
-        new()
+    public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Simple
+    {
+        get
         {
-            this.steps.SimpleGen,
-            this.steps.GenEntrypoint,
-            this.steps.ExecuteEntrypoint
-        };
+            yield return this.steps.SimpleGen;
+            yield return this.steps.GenEntrypoint;
+            yield return this.steps.ExecuteEntrypoint;
+        }
+    }
 
-    public List<Func<Task<List<Dictionary<string, string>>>>> Clarify =>
-        new()
+    public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Clarify
+    {
+        get
         {
-            this.steps.Clarify,
-            this.steps.GenClarifiedCode,
-            this.steps.GenEntrypoint,
-            this.steps.ExecuteEntrypoint
-        };
 
-    public List<Func<Task<List<Dictionary<string, string>>>>> Respec =>
-        new()
-        {
-            this.steps.GenSpec,
-            this.steps.Respec,
-            this.steps.GenUnitTests,
-            this.steps.GenCode,
-            this.steps.GenEntrypoint,
-            this.steps.ExecuteEntrypoint
-        };
+            yield return this.steps.Clarify;
+            yield return this.steps.GenClarifiedCode;
+            yield return this.steps.GenEntrypoint;
+            yield return this.steps.ExecuteEntrypoint;
+        }
+    }
 
-    public List<Func<Task<List<Dictionary<string, string>>>>> ExecuteOnly =>
-        new()
+    public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Respec
+    {
+        get
         {
-            this.steps.ExecuteEntrypoint
-        };
+            yield return this.steps.GenSpec;
+            yield return this.steps.Respec;
+            yield return this.steps.GenUnitTests;
+            yield return this.steps.GenCode;
+            yield return this.steps.GenEntrypoint;
+            yield return this.steps.ExecuteEntrypoint;
+        }
+    }
 
-    public List<Func<Task<List<Dictionary<string, string>>>>> UseFeedback =>
-        new()
+    public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> ExecuteOnly
+    {
+        get
         {
-            this.steps.UseFeedback
-        };
+            yield return this.steps.ExecuteEntrypoint;
+        }
+    }
+
+    public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> UseFeedback
+    {
+        get
+        {
+            yield return this.steps.UseFeedback;
+        }
+    }
 }
