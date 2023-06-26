@@ -2,5 +2,5 @@
 
 public interface IProjectFactory
 {
-    Task<Project> GetAsync(string path);
+    Task<Project> CreateProjectAsync(string path);
 }

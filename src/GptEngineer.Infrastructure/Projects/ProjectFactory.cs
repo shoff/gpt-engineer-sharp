@@ -21,7 +21,7 @@ public class ProjectFactory : IProjectFactory
         this.options = options;
     }
 
-    public async Task<Project> GetAsync(string path)
+    public async Task<Project> CreateProjectAsync(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
 

@@ -35,6 +35,7 @@ public static class Constants
     public const string OPENAI_API_KEY = "OPENAI_API_KEY";
     
     // configuration
+    public const string REDIS_OPTIONS = "RedisOptions";
     public const string GPT_OPTIONS = "GptOptions";
     public const string AI_OPTIONS = "AIOptions";
     public const string CERTIFICATE_OPTIONS = "CertificateOptions";

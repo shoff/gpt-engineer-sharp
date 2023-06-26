@@ -2,6 +2,13 @@
 
 public class Workspace
 {
+    private const string WORKSPACE = "/workspace";
+
+    public Workspace()
+    {
+        this.Path = WORKSPACE;
+    }
+
     public Workspace(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
@@ -9,7 +16,7 @@ public class Workspace
         CreateIfNotExists(path);
     }
 
-    public string Path { get; }
+    public string Path { get; set; }
 
     public Task FillAsync(string folder)
     {
@@ -26,8 +33,8 @@ public class Workspace
         }
         return Task.CompletedTask;
     }
-    public ICollection<string> FileList { get; } = new HashSet<string>();
-    public ICollection<string> Errors => new HashSet<string>();
+    public ICollection<string> FileList { get; set; } = new HashSet<string>();
+    public ICollection<string> Errors { get; set; }= new HashSet<string>();
     private void CreateIfNotExists(string path)
     {
         if (!Directory.Exists(path))

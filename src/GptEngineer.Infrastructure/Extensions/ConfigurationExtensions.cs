@@ -19,6 +19,12 @@ public static class ConfigurationExtensions
     {
         return configuration.GetNullableOptions<HostOptions>(HOST_OPTIONS);
     }
+
+    public static RedisOptions RedisOptions(this IConfiguration configuration)
+    {
+        return configuration.GetOptions<RedisOptions>(REDIS_OPTIONS);
+    }
+
     // Testable until the section.Get<T>
     // ReSharper disable once MemberCanBePrivate.Global
     public static T GetOptions<T>(this IConfiguration configuration,

@@ -7,13 +7,20 @@ public class Memory
     private const string SPECIFICATION = "specification";
     private const string UNIT_TEST = "unit_test";
     private const string LOGS = "/logs";
+    private const string MEMORY = "/memory";
+
+    public Memory()
+    {
+        this.Path = MEMORY;
+        this.GptLogs = new GptLogs(System.IO.Path.Combine(this.Path, LOGS));
+    }
 
     public Memory(string path)
     {
         ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
         this.Path = path;
         CreateIfNotExists(path);
-        this.GptLog = new GptLog(System.IO.Path.Combine(path,  LOGS));
+        this.GptLogs = new GptLogs(System.IO.Path.Combine(path,  LOGS));
     }
 
     public async Task FillAsync(string memoryFile)
@@ -39,7 +46,7 @@ public class Memory
 
         if (this.HasLogs)
         {
-            await this.GptLog.FillAsync($"{this.Path}{LOGS}");
+            await this.GptLogs.FillAsync($"{this.Path}{LOGS}");
         }
         else
         {
@@ -56,11 +63,11 @@ public class Memory
     }
 
     public bool HasLogs => Directory.Exists($"{this.Path}{LOGS}");
-    public GptLog GptLog { get; }
-    public ICollection<GptMessage>? Specifications { get; private set; } = new HashSet<GptMessage>();
-    public ICollection<GptMessage>? UnitTests { get; private set; } = new HashSet<GptMessage>();
+    public GptLogs GptLogs { get; set; }
+    public ICollection<GptMessage>? Specifications { get; set; } = new HashSet<GptMessage>();
+    public ICollection<GptMessage>? UnitTests { get; set; } = new HashSet<GptMessage>();
     public ICollection<string> Errors => new HashSet<string>();
-    public string Path { get; init; }
+    public string Path { get; set; }
     private void CreateIfNotExists(string path)
     {
         if (!Directory.Exists(path))

@@ -1,5 +1,7 @@
 ﻿
 
+namespace GptEngineer.Infrastructure.Services;
+
 public class FileSystem : IFileSystem
 {
     public string[] GetDirectories(string path, string searchPattern, EnumerationOptions enumerationOptions)

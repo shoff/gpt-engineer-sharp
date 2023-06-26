@@ -67,7 +67,7 @@ public class ChatHub : Hub
     public async Task StartProject(string projectName)
     {
         ArgumentException.ThrowIfNullOrEmpty(projectName, nameof(projectName));
-        this.project = await this.projectFactory.GetAsync(projectName);
+        this.project = await this.projectFactory.CreateProjectAsync(projectName);
         var projectInformation = new ProjectInformation(this.project.Name,
             this.project.HasWorkspace ? this.project.Workspace.FileList.Count : 0);
 

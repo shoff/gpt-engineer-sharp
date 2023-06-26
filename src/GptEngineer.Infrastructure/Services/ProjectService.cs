@@ -1,26 +1,43 @@
-﻿using GptEngineer.Core.Projects;
-using Microsoft.Extensions.Logging;
+﻿namespace GptEngineer.Infrastructure.Services;
 
-namespace GptEngineer.Infrastructure.Services;
+using Extensions;
+using GptEngineer.Core.Projects;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 
 public class ProjectService : IProjectService
 {
+    private readonly ILogger<ProjectService> logger;
     private readonly IProjectFactory projectFactory;
     private readonly IFileSystem fileSystem;
+    private readonly IDistributedCache cache;
 
     public ProjectService(
         ILogger<ProjectService> logger,
         IProjectFactory projectFactory,
-        IFileSystem fileSystem)
+        IFileSystem fileSystem,
+        IDistributedCache cache)
     {
+        this.logger = logger;
         this.projectFactory = projectFactory;
         this.fileSystem = fileSystem;
+        this.cache = cache;
     }
 
     public async Task<IEnumerable<Project>> GetProjectsAsync(string? projectDirectoryPath = null)
     {
-        // HACK
-        var projects = new List<Project>();
+        this.cache.TryGetFromCache<List<Project>>("projects", out var projects);
+
+        if (projects is { Count: > 0 })
+        {
+            return projects;
+        }
+        else
+        {
+            // hate this, the cache extension should handle this
+            projects = new List<Project>();
+        }
+
         projectDirectoryPath ??= @"../../../../../projects";
 
         var enumerationOptions = new EnumerationOptions()
@@ -37,15 +54,25 @@ public class ProjectService : IProjectService
 
             foreach (var projectDirectory in projectDirectories)
             {
-                var project = await this.projectFactory.GetAsync(projectDirectory);
-                projects.Add(project);
+                var project = await this.projectFactory.CreateProjectAsync(projectDirectory);
+                projects!.Add(project);
             }
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            this.logger.LogError("{Message}", e.Message);
         }
 
-        return projects;
+        if (projects is { Count: > 0 })
+        {
+            this.cache.TryAddToCache("projects", projects);
+        }
+
+        if (projects is null or { Count: > 0 })
+        {
+            this.logger.LogError("unable to find any projects, returning empty collection");
+        }
+
+        return projects ?? new List<Project>();
     }
 }

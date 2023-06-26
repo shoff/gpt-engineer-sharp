@@ -2,11 +2,22 @@
 
 using System.Text.Json;
 
-public class GptLog
+public class GptLogs
 {
-    public GptLog(string path)
+    private const string LOGS = "/logs";
+
+    public GptLogs()
     {
+        // This is probably not a great idea
+        this.Path = LOGS;
+    }
+
+    public GptLogs(string path)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
+
         this.Path = path;
+        
         CreateIfNotExists(path);
     }
     
@@ -44,9 +55,10 @@ public class GptLog
             }
         }
     }
+
     public string Path { get; set; }
-    public ICollection<GptMessage> Clarifications { get; } = new List<GptMessage>();
-    public ICollection<GptMessage> ClarificationsRan { get; } = new List<GptMessage>();
+    public ICollection<GptMessage> Clarifications { get; set; } = new List<GptMessage>();
+    public ICollection<GptMessage> ClarificationsRan { get; set; } = new List<GptMessage>();
     public ICollection<string> Errors => new HashSet<string>();
 
     private void CreateIfNotExists(string path)

@@ -1,20 +1,24 @@
-﻿using GptEngineer.Infrastructure.Projects;
+﻿namespace GptEngineer.Infrastructure;
+
+
+using GptEngineer.Infrastructure.Projects;
 using GptEngineer.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
-
-namespace GptEngineer.Infrastructure;
-
 using Core.Configuration;
+using Extensions;
 using GptEngineer.Core;
 using GptEngineer.Core.Projects;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using OpenAI.Extensions;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using StackExchange.Redis;
 
 public static class Ioc
 {
@@ -24,6 +28,7 @@ public static class Ioc
         services.AddOptions(); services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Pages");
         services.Configure<GptOptions>(configuration.GetSection(GPT_OPTIONS));
         services.Configure<AIOptions>(configuration.GetSection(AI_OPTIONS));
+        services.Configure<RedisOptions>(configuration.GetSection(REDIS_OPTIONS));
         return services;
     }
 
@@ -41,7 +46,7 @@ public static class Ioc
 
         services.AddOpenAIService(settings =>
         {
-            settings.ApiKey = Environment.GetEnvironmentVariable(OPENAI_API_KEY)
+            settings.ApiKey = Environment.GetEnvironmentVariable(GptEngineer.Core.Constants.OPENAI_API_KEY)
                 ?? throw new InvalidOperationException();
         });
 
@@ -66,6 +71,42 @@ public static class Ioc
             opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
                 new[] { APPLICATION_OCTET_STREAM });
         });
+
+        var redisOptions = configuration.RedisOptions();
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisOptions.Configuration;
+            options.InstanceName = redisOptions.InstanceName;
+            options.ConfigurationOptions = new ConfigurationOptions
+            {
+                AllowAdmin = redisOptions.ConfigurationOptions.AllowAdmin,
+                AbortOnConnectFail = false,
+                AsyncTimeout = redisOptions.ConfigurationOptions.AsyncTimeout,
+                ChannelPrefix = redisOptions.ConfigurationOptions.ChannelPrefix,
+                ClientName = redisOptions.ConfigurationOptions.ClientName,
+                CommandMap = CommandMap.Create(redisOptions.ConfigurationOptions.Commands, available: false),
+                ConfigCheckSeconds = redisOptions.ConfigurationOptions.ConfigCheckSeconds,
+                ConfigurationChannel = redisOptions.ConfigurationOptions.ConfigurationChannel,
+                ConnectRetry = redisOptions.ConfigurationOptions.ConnectRetry,
+                DefaultDatabase = redisOptions.ConfigurationOptions.DefaultDatabase,
+                HighPrioritySocketThreads = redisOptions.ConfigurationOptions.HighPrioritySocketThreads,
+                KeepAlive = redisOptions.ConfigurationOptions.KeepAlive,
+                Password = redisOptions.ConfigurationOptions.Password,
+                Proxy = redisOptions.ConfigurationOptions.Proxy > -1 ? (Proxy)redisOptions.ConfigurationOptions.Proxy : Proxy.None,
+                ServiceName = redisOptions.ConfigurationOptions.ServiceName,
+                Ssl = redisOptions.ConfigurationOptions.UseSsl,
+                SslHost = redisOptions.ConfigurationOptions.SslHost,
+                SyncTimeout = redisOptions.ConfigurationOptions.SyncTimeout,
+                TieBreaker = redisOptions.ConfigurationOptions.TieBreaker,
+                SslProtocols = redisOptions.ConfigurationOptions.SslProtocols
+            };
+
+            foreach (var endpoint in redisOptions.ConfigurationOptions.Endpoints)
+            {
+                options.ConfigurationOptions.EndPoints.Add(endpoint.Host, endpoint.Port);
+            }
+        });
+
         // this might need to go on the API
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IProjectFactory, ProjectFactory>();

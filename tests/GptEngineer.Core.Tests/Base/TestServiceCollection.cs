@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 public class TestServiceCollection : ServiceCollection, IServiceCollection
 {
     public TestServiceCollection(
-        ITestOutputHelper outputHelper = null!, Microsoft.Extensions.Logging.LogLevel logLevel = Microsoft.Extensions.Logging.LogLevel.Debug)
+        ITestOutputHelper outputHelper = null!, LogLevel logLevel = LogLevel.Debug)
     {
         this.Configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", true, true)
@@ -20,7 +20,6 @@ public class TestServiceCollection : ServiceCollection, IServiceCollection
         this.AddSingleton(this.Configuration);
         this.AddRouting();
         this.AddOptions();
-        this.AddLogging(outputHelper);
         this.RegisterLoggers();
         this.AddHttpClient();
     }
