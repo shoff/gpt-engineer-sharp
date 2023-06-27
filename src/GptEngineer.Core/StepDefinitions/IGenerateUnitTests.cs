@@ -1,4 +1,4 @@
-﻿namespace GptEngineer.Infrastructure.StepDefinitions;
+﻿namespace GptEngineer.Core.StepDefinitions;
 
 public interface IGenerateUnitTests
 {

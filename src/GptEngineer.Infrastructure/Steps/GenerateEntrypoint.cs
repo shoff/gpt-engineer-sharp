@@ -4,7 +4,6 @@ using Core.StepDefinitions;
 using System.Text.RegularExpressions;
 using Core;
 using Core.Stores;
-using StepDefinitions;
 
 public class GenerateEntrypoint : IStep, IGenerateEntrypoint
 {

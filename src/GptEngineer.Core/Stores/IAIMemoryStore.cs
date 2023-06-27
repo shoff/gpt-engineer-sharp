@@ -4,8 +4,3 @@ public interface IAIMemoryStore : IDataStore
 {
     
 }
-
-public interface IClarifyStore : IDataStore
-{
-
-}

@@ -1,4 +1,4 @@
-﻿namespace GptEngineer.Data;
+﻿namespace GptEngineer.Data.Configuration;
 
 public record InputOptions
 {

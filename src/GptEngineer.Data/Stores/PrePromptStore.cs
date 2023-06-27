@@ -1,16 +1,14 @@
 ﻿namespace GptEngineer.Data.Stores;
 
-using Core.Stores;
-using GptEngineer.Data.Contexts;
-using GptEngineer.Data.Entities;
+using Contexts;
+using Entities;
 using MongoDB.Driver;
 
-
-public class InputStore : IInputStore
+public class PrePromptStore : IPrePromptStore
 {
-    private readonly IInputDbContext dbContext;
+    private readonly IPrePromptDbContext dbContext;
 
-    public InputStore(IInputDbContext dbContext)
+    public PrePromptStore(IPrePromptDbContext dbContext)
     {
         this.dbContext = dbContext;
     }
@@ -19,8 +17,8 @@ public class InputStore : IInputStore
     {
         get
         {
-            var filter = Builders<Input>.Filter.Eq("Key", key);
-            var specification = this.dbContext.Inputs.Find(filter).FirstOrDefault();
+            var filter = Builders<PrePrompt>.Filter.Eq("Key", key);
+            var specification = this.dbContext.PrePrompts.Find(filter).FirstOrDefault();
             if (specification != null)
             {
                 return specification.Content ?? string.Empty;
@@ -32,7 +30,7 @@ public class InputStore : IInputStore
         {
             ArgumentNullException.ThrowIfNull(value, nameof(value));
             ArgumentNullException.ThrowIfNull(key, nameof(key));
-            this.dbContext.Inputs.InsertOne(new Input { Role = key, Content = value });
+            this.dbContext.PrePrompts.InsertOne(new PrePrompt { Role = key, Content = value });
         }
     }
 }

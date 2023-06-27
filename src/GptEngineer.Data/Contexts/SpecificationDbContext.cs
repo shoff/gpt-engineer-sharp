@@ -1,6 +1,7 @@
 ﻿namespace GptEngineer.Data.Contexts;
 
 using Entities;
+using GptEngineer.Data.Configuration;
 using MongoDB.Driver;
 
 public sealed class SpecificationDbContext : ISpecificationDbContext

@@ -1,47 +1,34 @@
 ﻿namespace GptEngineer.Infrastructure.Steps;
 
 using Core.StepDefinitions;
-using System.Diagnostics;
+using CliWrap;
 using Core.Stores;
-using StepDefinitions;
+using Data.Stores;
 
 public class ExecuteEntrypoint : IStep, IExecuteEntrypoint
 {
+    private readonly IPrePromptStore prePromptStore;
     private readonly IWorkspaceStore workspaceStore;
 
     public ExecuteEntrypoint(
+        IPrePromptStore prePromptStore,
         IWorkspaceStore workspaceStore)
     {
+        this.prePromptStore = prePromptStore;
         this.workspaceStore = workspaceStore;
     }
 
     public async Task<IEnumerable<Dictionary<string, string>>> RunAsync()
     {
+        // TODO this is hackish and should allow for user input
+        // this seems incredibly fragile
         var command = this.workspaceStore["run.bat"];
 
-        //Console.WriteLine("Do you want to execute this code?");
-        //Console.WriteLine();
-        //Console.WriteLine(command);
-        //Console.WriteLine();
-        //Console.WriteLine("If yes, press enter. Otherwise, type \"no\"");
-        //Console.WriteLine();
-
-        //if (!string.IsNullOrEmpty(Console.ReadLine()))
-        //{
-        //    Console.WriteLine("Ok, not executing the code.");
-        //    return new IEnumerable<Dictionary<string, string>>();
-        //}
-
-        //Console.WriteLine("Executing the code...");
-        //Console.WriteLine();
-
         // TODO should be configurable
-        await Process.Start(new ProcessStartInfo
-        {
-            FileName = "C:\\tools\\Cmder\\cmder.exe",
-            Arguments = "run.bat",
-            WorkingDirectory = this.workspaceStore["path"]
-        })?.WaitForExitAsync()!;
+        _=await Cli.Wrap("C:\\tools\\Cmder\\cmder.exe")
+            .WithArguments("run.bat")
+            .WithWorkingDirectory(this.workspaceStore["path"])
+            .ExecuteAsync();
 
         return new List<Dictionary<string, string>>();
     }

@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Core.Configuration;
 using Core.StepDefinitions;
-using Data;
 using Data.Stores;
 using Extensions;
 using GptEngineer.Core;
@@ -24,7 +23,7 @@ using StackExchange.Redis;
 using GptEngineer.Core.Stores;
 using GptEngineer.Data.Contexts;
 using GptEngineer.Infrastructure.Steps;
-using StepDefinitions;
+using GptEngineer.Data.Configuration;
 
 public static class Ioc
 {
@@ -40,8 +39,10 @@ public static class Ioc
         services.Configure<AIMemoryOptions>(configuration.GetSection(AI_MEMORY_OPTIONS));
         services.Configure<InputOptions>(configuration.GetSection(INPUT_OPTIONS));
         services.Configure<IdentityOptions>(configuration.GetSection(IDENTITY_OPTIONS));
-        services.Configure<ClarifyOptions>(configuration.GetSection(CLARIFY_OPTIONS));
+        services.Configure<StepOptions>(configuration.GetSection(STEP_OPTIONS));
         services.Configure<SpecificationStoreOptions>(configuration.GetSection(SPECIFICATION_STORE_OPTIONS));
+        services.Configure<PrePromptOptions>(configuration.GetSection(PRE_PROMPT_OPTIONS));
+        services.Configure<ReviewOptions>(configuration.GetSection(REVIEW_OPTIONS));
         return services;
     }
 
@@ -59,7 +60,7 @@ public static class Ioc
 
         services.AddOpenAIService(settings =>
         {
-            settings.ApiKey = Environment.GetEnvironmentVariable(GptEngineer.Core.Constants.OPENAI_API_KEY)
+            settings.ApiKey = Environment.GetEnvironmentVariable(OPENAI_API_KEY)
                 ?? throw new InvalidOperationException();
         });
 
@@ -129,20 +130,24 @@ public static class Ioc
 
         // this might need to go on the API
         
-        services.AddTransient<IClarifyDbContext, ClarifyDbContext>();
+        services.AddTransient<IStepDbContext, StepDbContext>();
         services.AddTransient<IInputDbContext,  InputDbContext>();
         services.AddTransient<IAIMemoryDbContext, AIMemoryDbContext>();
-        
+        services.AddTransient<IPrePromptDbContext, PrePromptDbContext>();
+        services.AddTransient<IReviewDbContext, ReviewDbContext>();
+
         // steps
         services.AddTransient<IGenerateSpecification, GenerateSpecification>();
         services.AddTransient<IGenerateCode, GenerateCode>();
         services.AddTransient<IGenerateUnitTests, GenerateUnitTests>();
-        services.AddTransient<IClarify, ClarifyStep>();
+        services.AddTransient<IClarify, Clarify>();
         services.AddTransient<IGenerateEntrypoint, GenerateEntrypoint>();
         services.AddTransient<IExecuteEntrypoint, ExecuteEntrypoint>();
+        services.AddSingleton<IReviewStore, ReviewStore>();
+        services.AddSingleton<IPrePromptStore, PrePromptStore>();
+        services.AddScoped<IReviewService, ReviewService>();
 
-
-        services.AddSingleton<IClarifyStore, ClarifyStore>();
+        services.AddSingleton<IStepStore, StepStore>();
         services.AddSingleton<ISpecificationStore, SpecificationStore>();
         services.AddSingleton<IWorkspaceStore, WorkspaceStore>();
         services.AddSingleton<IInputStore, InputStore>();

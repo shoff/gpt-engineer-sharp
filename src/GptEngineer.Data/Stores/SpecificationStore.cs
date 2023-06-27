@@ -1,6 +1,7 @@
 ﻿namespace GptEngineer.Data.Stores;
 
 using Core.Stores;
+using GptEngineer.Data.Contexts;
 using GptEngineer.Data.Entities;
 using MongoDB.Driver;
 

@@ -3,21 +3,27 @@
 using Core;
 using Core.StepDefinitions;
 using Core.Stores;
+using Data.Stores;
+using Microsoft.Extensions.Logging;
 
-public class GenerateSpecification : IStep, IGenerateSpecification
+public class GenerateSpecification : Step, IStep, IGenerateSpecification
 {
-    private const string PHILOSOPHY = "philosophy";
-    private const string GENERATE = "generate";
+    private readonly ILogger<GenerateSpecification> logger;
     private readonly IAI ai;
     private readonly IInputStore inputStore;
     private readonly IIdentityStore identityStore;
     private readonly IAIMemoryStore iaiMemoryStore;
 
-    public GenerateSpecification(IAI ai,
+    public GenerateSpecification(
+        ILogger<GenerateSpecification> logger,
+        IAI ai,
+        IPrePromptStore prePromptStore,
         IInputStore inputStore,
         IIdentityStore identityStore,
-        IAIMemoryStore iaiMemoryStore)
+        IAIMemoryStore iaiMemoryStore) 
+        : base(prePromptStore)
     {
+        this.logger = logger;
         this.ai = ai;
         this.inputStore = inputStore;
         this.identityStore = identityStore;
@@ -26,25 +32,27 @@ public class GenerateSpecification : IStep, IGenerateSpecification
 
     public async Task<IEnumerable<Dictionary<string, string>>> RunAsync()
     {
-        // Generate a spec from the main prompt + clarifications and save the
-        // results to the workspace
-        IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
+        try
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()),
-            this.ai.AsSystemRole($"Instructions: {this.inputStore[MAIN_PROMPT]}")
-        };
+            // Generate a spec from the main prompt + clarifications and save the
+            // results to the workspace
+            IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
+            {
+                this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()),
+                this.ai.AsRoleMessage(Role.System, $"Instructions: {this.inputStore[MAIN_PROMPT]}")
+            };
 
-        // the call to next must persist or something
-        messages = await this.ai.NextAsync(messages, this.identityStore[SPEC]);
-        var genSpec = messages as Dictionary<string, string>[] ?? messages.ToArray();
-        
-        this.iaiMemoryStore[SPECIFICATION] = genSpec.Last()[CONTENT];
-        return genSpec;
+            // the call to next must persist or something
+            messages = await this.ai.NextAsync(messages, this.identityStore[SPEC]);
+            var genSpec = messages as Dictionary<string, string>[] ?? messages.ToArray();
+
+            this.iaiMemoryStore[SPECIFICATION] = genSpec.Last()[CONTENT];
+            return genSpec;
+        }
+        catch (Exception e)
+        {
+            this.logger.LogError(e, "Error in GenerateSpecification");
+            throw;
+        }
     }
-
-    private string SetupSysPrompt()
-    {
-        return this.identityStore[GENERATE] + "\nUseful to know:\n" + this.identityStore[PHILOSOPHY];
-    }
-
 }

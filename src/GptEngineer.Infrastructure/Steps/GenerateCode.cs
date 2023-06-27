@@ -3,8 +3,9 @@
 using Core;
 using Core.StepDefinitions;
 using Core.Stores;
+using Data.Stores;
 
-public class GenerateCode : IStep, IGenerateCode
+public class GenerateCode : Step, IStep, IGenerateCode
 {
     private readonly IAI ai;
     private readonly IInputStore inputStore;
@@ -16,7 +17,9 @@ public class GenerateCode : IStep, IGenerateCode
         IInputStore inputStore,
         IIdentityStore identityStore,
         IAIMemoryStore iaiMemoryStore,
-        IWorkspaceStore workspaceStore)
+        IWorkspaceStore workspaceStore,
+        IPrePromptStore prePromptStore) 
+        : base(prePromptStore)
     {
         this.ai = ai;
         this.inputStore = inputStore;
@@ -32,10 +35,10 @@ public class GenerateCode : IStep, IGenerateCode
 
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()),
-            this.ai.AsUserRole($"Instructions: {this.inputStore[MAIN_PROMPT]}"),        // {this.dbs.Input[MAIN_PROMPT]}"),
-            this.ai.AsUserRole($"Specification:\n\n{this.iaiMemoryStore[SPECIFICATION]}"), // {this.dbs.Memory[SPECIFICATION]}"),
-            this.ai.AsUserRole($"Unit tests:\n\n{this.iaiMemoryStore[UNIT_TESTS]}")
+            this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()),
+            this.ai.AsRoleMessage(Role.User, $"Instructions: {this.inputStore[MAIN_PROMPT]}"),        // {this.dbs.Input[MAIN_PROMPT]}"),
+            this.ai.AsRoleMessage(Role.User, $"Specification:\n\n{this.iaiMemoryStore[SPECIFICATION]}"), // {this.dbs.Memory[SPECIFICATION]}"),
+            this.ai.AsRoleMessage(Role.User, $"Unit tests:\n\n{this.iaiMemoryStore[UNIT_TESTS]}")
         };
 
         messages = await this.ai.NextAsync(messages, this.identityStore[USE_QA]);
@@ -44,8 +47,5 @@ public class GenerateCode : IStep, IGenerateCode
         return runAsync;
     }
 
-    private string SetupSysPrompt()
-    {
-        return this.identityStore[GENERATE] + "\nUseful to know:\n" + this.identityStore[PHILOSOPHY];
-    }
+
 }

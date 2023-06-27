@@ -2,11 +2,11 @@
 
 namespace GptEngineer.Core;
 
-using Infrastructure.StepDefinitions;
 using StepDefinitions;
 
 public class StepRunner : IStepRunner
 {
+    private readonly IClarify clarify;
     private readonly IGenerateCode generateCode;
     private readonly IGenerateEntrypoint generateEntrypoint;
     private readonly IGenerateUnitTests generateUnitTests;
@@ -18,12 +18,14 @@ public class StepRunner : IStepRunner
         IAI ai, 
         IDataStores dbs,
         IWorkspaceStore workspaceStore,
+        IClarify clarify,
         IGenerateCode generateCode,
         IGenerateEntrypoint generateEntrypoint,
         IGenerateUnitTests generateUnitTests,
         IExecuteEntrypoint executeEntrypoint,
         IGenerateSpecification generateSpecification)
     {
+        this.clarify = clarify;
         this.generateCode = generateCode;
         this.generateEntrypoint = generateEntrypoint;
         this.generateUnitTests = generateUnitTests;
@@ -32,6 +34,7 @@ public class StepRunner : IStepRunner
         this.steps = new Steps(ai, dbs, workspaceStore);
     }
 
+    // Should be able to now run default steps hahahahahah yeah right
     public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Default
     {
         get
@@ -70,8 +73,7 @@ public class StepRunner : IStepRunner
     {
         get
         {
-
-            yield return this.steps.Clarify;
+            yield return this.clarify.RunAsync;
             yield return this.steps.GenClarifiedCode;
             yield return this.generateEntrypoint.RunAsync;
             yield return this.executeEntrypoint.RunAsync;

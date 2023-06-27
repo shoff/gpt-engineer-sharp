@@ -9,6 +9,11 @@ public static class Constants
     public const string ROOT_COMPONENT = "#app";
     public const string DEFAULT = "default";
 
+    public const string ROLE = "role";
+    public const string USER = "user";
+    public const string ASSISTANT = "assistant";
+    public const string SYSTEM = "system";
+
     // steps
     public const string SPECIFICATION = "specification";
     public const string MAIN_PROMPT = "main_prompt";
@@ -17,11 +22,15 @@ public static class Constants
     public const string RESPEC = "respec";
     public const string UNIT_TESTS = "unit_tests";
     public const string USE_QA = "use_qa";
-
+    public const string CLARIFY = "clarify";
+    public const string KEY = "Key";
+    
     public const string AI_MEMORY_OPTIONS = "AIMemoryOptions";
     public const string INPUT_OPTIONS = "InputOptions";
-    public const string CLARIFY_OPTIONS = "ClarifyOptions";
+    public const string STEP_OPTIONS = "StepOptions";
     public const string SPECIFICATION_STORE_OPTIONS = "SpecificationStoreOptions";
+    public const string PRE_PROMPT_OPTIONS = "PrePromptOptions";
+    public const string REVIEW_OPTIONS = "ReviewOptions";
 
     public const string PHILOSOPHY = "philosophy";
     public const string GENERATE = "generate";
@@ -32,19 +41,10 @@ public static class Constants
     // auth
     public const string AUTHORIZED_CLIENT_NAME = "authorizedClient";
     public const string LOG_IN_PATH = "LogInPath";
-    public const string LOG_OUT_PATH = "LogOutPath";
     public const string HEADER_NAME = "X-XSRF-TOKEN";
     public const string COOKIE_NAME = "__Host-X-XSRF-TOKEN";
     public const string XML_HTTP_REQUEST_HEADER = "XMLHttpRequest";
     public const string APPLICATION_JSON = "application/json";
-
-    // logging constants
-    public const string VERBOSE = "Verbose";
-    public const string DEBUG = "Debug";
-    public const string INFORMATION = "Information";
-    public const string WARNING = "Warning";
-    public const string ERROR = "Error";
-    public const string FATAL = "Fatal";
 
     // environment variables
     public const string OPENAI_API_KEY = "OPENAI_API_KEY";

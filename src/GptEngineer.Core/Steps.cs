@@ -49,7 +49,7 @@ public class Steps : ISteps
         // TODO This is clearly incorrect 
         var messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.dbs.Identity["qa"])
+            this.ai.AsRoleMessage(Role.System, this.dbs.Identity["qa"])
         };
         var user = this.dbs.Input[MAIN_PROMPT]; // user is the main prompt
 
@@ -87,8 +87,8 @@ public class Steps : ISteps
         // results to the workspace
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()),
-            this.ai.AsSystemRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}")
+            this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()),
+            this.ai.AsRoleMessage(Role.System, $"Instructions: {this.dbs.Input[MAIN_PROMPT]}")
         };
 
         // the call to next must persist or something
@@ -109,7 +109,7 @@ public class Steps : ISteps
 
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.dbs.Identity[RESPEC])
+            this.ai.AsRoleMessage(Role.System, this.dbs.Identity[RESPEC])
         };
 
         messages = await this.ai.NextAsync(messages);
@@ -130,7 +130,7 @@ public class Steps : ISteps
     {
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}")
+            this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()), this.ai.AsRoleMessage(Role.User, $"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsRoleMessage(Role.User, $"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}")
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity[UNIT_TESTS]);
@@ -148,7 +148,7 @@ public class Steps : ISteps
         IEnumerable<Dictionary<string, string>> messages = messageList;
         messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()),
+            this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()),
         }.Concat(messages.Skip(1));
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity[USE_QA]);
@@ -161,10 +161,10 @@ public class Steps : ISteps
     {
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()),
-            this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"),
-            this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}"),
-            this.ai.AsUserRole($"Unit tests:\n\n{this.dbs.Memory[UNIT_TESTS]}")
+            this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()),
+            this.ai.AsRoleMessage(Role.User, $"Instructions: {this.dbs.Input[MAIN_PROMPT]}"),
+            this.ai.AsRoleMessage(Role.User, $"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}"),
+            this.ai.AsRoleMessage(Role.User, $"Unit tests:\n\n{this.dbs.Memory[UNIT_TESTS]}")
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity[USE_QA]);
@@ -259,7 +259,7 @@ public class Steps : ISteps
     {
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsAssistantRole(this.dbs.Workspace["all_output.txt"]), this.ai.AsSystemRole(this.dbs.Identity["use_feedback"])
+            this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()), this.ai.AsRoleMessage(Role.User, $"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsRoleMessage(Role.Assistant, dbs.Workspace["all_output.txt"]), this.ai.AsRoleMessage(Role.System, this.dbs.Identity["use_feedback"])
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Memory["feedback"]);
@@ -272,7 +272,7 @@ public class Steps : ISteps
         var codeOutput = JsonSerializer.Deserialize<IEnumerable<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.GenCode)]).Last()[CONTENT];
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
-            this.ai.AsSystemRole(this.SetupSysPrompt()), this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsUserRole(codeOutput), this.ai.AsSystemRole(this.dbs.Identity["fix_code"])
+            this.ai.AsRoleMessage(Role.System, this.SetupSysPrompt()), this.ai.AsRoleMessage(Role.User, $"Instructions: {this.dbs.Input[MAIN_PROMPT]}"), this.ai.AsRoleMessage(Role.User, codeOutput), this.ai.AsRoleMessage(Role.System, this.dbs.Identity["fix_code"])
         };
 
         messages = await this.ai.NextAsync(messages, "Please fix any errors in the code above.");

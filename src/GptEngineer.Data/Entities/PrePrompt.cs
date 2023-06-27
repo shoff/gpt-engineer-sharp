@@ -1,9 +1,9 @@
-﻿namespace GptEngineer.Data.Entities;
+﻿using MongoDB.Bson.Serialization.Attributes;
 
-using MongoDB.Bson.Serialization.Attributes;
+namespace GptEngineer.Data.Entities;
 
 [BsonIgnoreExtraElements]
-public class Clarify
+public class PrePrompt
 {
     public string? Role { get; set; }
     public string? Content { get; set; }

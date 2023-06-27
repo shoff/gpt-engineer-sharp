@@ -16,6 +16,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\GptEngineer.Core\GptEngineer.Core.csproj" />
 		<ProjectReference Include="..\GptEngineer.Data\GptEngineer.Data.csproj" />
+		<PackageReference Include="CliWrap" Version="3.6.4" />
 		<PackageReference Include="FluentValidation" Version="11.5.2" />
 		<PackageReference Include="Mediator.Abstractions" Version="2.1.5" />
 		<PackageReference Include="Mediator.SourceGenerator" Version="2.1.5">
