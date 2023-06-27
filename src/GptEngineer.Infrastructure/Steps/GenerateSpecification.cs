@@ -1,9 +1,10 @@
 ﻿namespace GptEngineer.Infrastructure.Steps;
 
 using Core;
+using Core.StepDefinitions;
 using Core.Stores;
 
-public class GenerateSpecification : IStep
+public class GenerateSpecification : IStep, IGenerateSpecification
 {
     private const string PHILOSOPHY = "philosophy";
     private const string GENERATE = "generate";

@@ -2,14 +2,33 @@
 
 namespace GptEngineer.Core;
 
+using Infrastructure.StepDefinitions;
+using StepDefinitions;
+
 public class StepRunner : IStepRunner
 {
+    private readonly IGenerateCode generateCode;
+    private readonly IGenerateEntrypoint generateEntrypoint;
+    private readonly IGenerateUnitTests generateUnitTests;
+    private readonly IExecuteEntrypoint executeEntrypoint;
+    private readonly IGenerateSpecification generateSpecification;
     private readonly Steps steps;
+
     public StepRunner(
         IAI ai, 
         IDataStores dbs,
-        IWorkspaceStore workspaceStore)
+        IWorkspaceStore workspaceStore,
+        IGenerateCode generateCode,
+        IGenerateEntrypoint generateEntrypoint,
+        IGenerateUnitTests generateUnitTests,
+        IExecuteEntrypoint executeEntrypoint,
+        IGenerateSpecification generateSpecification)
     {
+        this.generateCode = generateCode;
+        this.generateEntrypoint = generateEntrypoint;
+        this.generateUnitTests = generateUnitTests;
+        this.executeEntrypoint = executeEntrypoint;
+        this.generateSpecification = generateSpecification;
         this.steps = new Steps(ai, dbs, workspaceStore);
     }
 
@@ -17,11 +36,11 @@ public class StepRunner : IStepRunner
     {
         get
         {
-            yield return this.steps.GenSpec;
-            yield return this.steps.GenUnitTests;
-            yield return this.steps.GenCode;
-            yield return this.steps.GenEntrypoint;
-            yield return this.steps.ExecuteEntrypoint;
+            yield return this.generateSpecification.RunAsync;
+            yield return this.generateUnitTests.RunAsync;
+            yield return this.generateCode.RunAsync;
+            yield return this.generateEntrypoint.RunAsync;
+            yield return this.executeEntrypoint.RunAsync;
         }
     }
 
@@ -29,11 +48,11 @@ public class StepRunner : IStepRunner
     {
         get
         {
-            yield return this.steps.GenSpec;
-            yield return this.steps.GenUnitTests;
-            yield return this.steps.GenCode;
+            yield return this.generateSpecification.RunAsync;
+            yield return this.generateUnitTests.RunAsync;
+            yield return this.generateCode.RunAsync;
             yield return this.steps.FixCode;
-            yield return this.steps.GenEntrypoint;
+            yield return this.generateEntrypoint.RunAsync;
         }
     }
 
@@ -42,8 +61,8 @@ public class StepRunner : IStepRunner
         get
         {
             yield return this.steps.SimpleGen;
-            yield return this.steps.GenEntrypoint;
-            yield return this.steps.ExecuteEntrypoint;
+            yield return this.generateEntrypoint.RunAsync;
+            yield return this.executeEntrypoint.RunAsync;
         }
     }
 
@@ -54,8 +73,8 @@ public class StepRunner : IStepRunner
 
             yield return this.steps.Clarify;
             yield return this.steps.GenClarifiedCode;
-            yield return this.steps.GenEntrypoint;
-            yield return this.steps.ExecuteEntrypoint;
+            yield return this.generateEntrypoint.RunAsync;
+            yield return this.executeEntrypoint.RunAsync;
         }
     }
 
@@ -63,12 +82,12 @@ public class StepRunner : IStepRunner
     {
         get
         {
-            yield return this.steps.GenSpec;
+            yield return this.generateSpecification.RunAsync;
             yield return this.steps.Respec;
-            yield return this.steps.GenUnitTests;
-            yield return this.steps.GenCode;
-            yield return this.steps.GenEntrypoint;
-            yield return this.steps.ExecuteEntrypoint;
+            yield return this.generateUnitTests.RunAsync;
+            yield return this.generateCode.RunAsync;
+            yield return this.generateEntrypoint.RunAsync;
+            yield return this.executeEntrypoint.RunAsync;
         }
     }
 

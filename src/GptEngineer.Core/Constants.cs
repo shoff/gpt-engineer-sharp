@@ -23,6 +23,9 @@ public static class Constants
     public const string CLARIFY_OPTIONS = "ClarifyOptions";
     public const string SPECIFICATION_STORE_OPTIONS = "SpecificationStoreOptions";
 
+    public const string PHILOSOPHY = "philosophy";
+    public const string GENERATE = "generate";
+
     // network stuffs
     public const string APPLICATION_OCTET_STREAM = "application/octet-stream";
     
@@ -47,6 +50,8 @@ public static class Constants
     public const string OPENAI_API_KEY = "OPENAI_API_KEY";
     
     // configuration
+    public const string IDENTITY_OPTIONS = "IdentityOptions";
+    public const string WORKSPACE_OPTIONS = "WorkspaceOptions";
     public const string REDIS_OPTIONS = "RedisOptions";
     public const string GPT_OPTIONS = "GptOptions";
     public const string AI_OPTIONS = "AIOptions";

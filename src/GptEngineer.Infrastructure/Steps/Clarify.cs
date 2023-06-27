@@ -1,9 +1,11 @@
 ﻿namespace GptEngineer.Infrastructure.Steps;
 
 using Core;
+using Core.StepDefinitions;
 using Core.Stores;
+using StepDefinitions;
 
-public class Clarify : IStep
+public class ClarifyStep : IStep, IClarify
 {
     private const string KEY = "qa";
     private readonly IAI ai;
@@ -11,7 +13,7 @@ public class Clarify : IStep
     private readonly IIdentityStore identityStore;
     private readonly IInputStore inputStore;
 
-    public Clarify(
+    public ClarifyStep(
         IAI ai,
         IClarifyStore clarifyStore,
         IIdentityStore identityStore,

@@ -1,5 +1,4 @@
-﻿namespace GptEngineer.Core;
-using GptEngineer.Core.Stores;
+﻿namespace GptEngineer.Core.Stores;
 
 public class DataStores : IDataStores
 {

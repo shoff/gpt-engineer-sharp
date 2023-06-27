@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Core.Configuration;
+using Core.StepDefinitions;
 using Data;
+using Data.Stores;
 using Extensions;
 using GptEngineer.Core;
 using GptEngineer.Core.Projects;
@@ -21,6 +23,8 @@ using OpenAI.Extensions;
 using StackExchange.Redis;
 using GptEngineer.Core.Stores;
 using GptEngineer.Data.Contexts;
+using GptEngineer.Infrastructure.Steps;
+using StepDefinitions;
 
 public static class Ioc
 {
@@ -30,10 +34,12 @@ public static class Ioc
     {
         services.AddOptions(); services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Pages");
         services.Configure<GptOptions>(configuration.GetSection(GPT_OPTIONS));
+        services.Configure<WorkspaceOptions>(configuration.GetSection(WORKSPACE_OPTIONS));
         services.Configure<AIOptions>(configuration.GetSection(AI_OPTIONS));
         services.Configure<RedisOptions>(configuration.GetSection(REDIS_OPTIONS));
         services.Configure<AIMemoryOptions>(configuration.GetSection(AI_MEMORY_OPTIONS));
         services.Configure<InputOptions>(configuration.GetSection(INPUT_OPTIONS));
+        services.Configure<IdentityOptions>(configuration.GetSection(IDENTITY_OPTIONS));
         services.Configure<ClarifyOptions>(configuration.GetSection(CLARIFY_OPTIONS));
         services.Configure<SpecificationStoreOptions>(configuration.GetSection(SPECIFICATION_STORE_OPTIONS));
         return services;
@@ -127,9 +133,19 @@ public static class Ioc
         services.AddTransient<IInputDbContext,  InputDbContext>();
         services.AddTransient<IAIMemoryDbContext, AIMemoryDbContext>();
         
+        // steps
+        services.AddTransient<IGenerateSpecification, GenerateSpecification>();
+        services.AddTransient<IGenerateCode, GenerateCode>();
+        services.AddTransient<IGenerateUnitTests, GenerateUnitTests>();
+        services.AddTransient<IClarify, ClarifyStep>();
+        services.AddTransient<IGenerateEntrypoint, GenerateEntrypoint>();
+        services.AddTransient<IExecuteEntrypoint, ExecuteEntrypoint>();
+
+
         services.AddSingleton<IClarifyStore, ClarifyStore>();
         services.AddSingleton<ISpecificationStore, SpecificationStore>();
         services.AddSingleton<IWorkspaceStore, WorkspaceStore>();
+        services.AddSingleton<IInputStore, InputStore>();
         services.AddSingleton<IProjectService, ProjectService>();
         services.AddSingleton<IAIMemoryStore, AIMemoryStore>();
         services.AddSingleton<IIdentityStore, IdentityStore>();

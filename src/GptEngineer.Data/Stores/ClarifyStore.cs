@@ -1,8 +1,8 @@
-﻿namespace GptEngineer.Data;
+﻿namespace GptEngineer.Data.Stores;
 
 using Core.Stores;
-using Entities;
 using GptEngineer.Data.Contexts;
+using GptEngineer.Data.Entities;
 using MongoDB.Driver;
 
 public class ClarifyStore : IClarifyStore

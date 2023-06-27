@@ -1,4 +1,4 @@
-﻿namespace GptEngineer.Data;
+﻿namespace GptEngineer.Data.Stores;
 
 using Core.Stores;
 using GptEngineer.Data.Entities;

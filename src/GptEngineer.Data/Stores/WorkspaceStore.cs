@@ -1,15 +1,19 @@
-﻿namespace GptEngineer.Data;
+﻿namespace GptEngineer.Data.Stores;
 
-using Core;
-using Core.Stores;
 using System.Text.RegularExpressions;
+using Core.Configuration;
+using Core.Stores;
+using Microsoft.Extensions.Options;
 
 public class WorkspaceStore : DataStore, IWorkspaceStore
 {
     private static readonly Regex regex = new(@"(\S+?)\n```\S+\n(.+?)```", RegexOptions.Compiled);
     
-    public WorkspaceStore(string path)
-        : base(path)
+    public WorkspaceStore(
+        
+        // TODO this is a bug because we don't know the project name at this point
+        IOptions<WorkspaceOptions> options)
+        : base(options.Value.Path)
     {
     }
 
