@@ -9,6 +9,7 @@ using GptEngineer.Core.Configuration;
 using Microsoft.AspNetCore.SignalR;
 using OpenAI.Managers;
 using OpenAI;
+using GptEngineer.Core.Stores;
 
 public class ChatHub : Hub
 {

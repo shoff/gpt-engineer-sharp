@@ -88,6 +88,7 @@ public class AI : IAI
 
         this.logger.LogInformation("Creating a new chat completion: {Messages}", messages);
 
+        // convert from Dictionary<string, string> to GptMessage
         var gptMessages = messages.Select(m => new GptMessage
         {
             Role = m[ROLE],
@@ -97,6 +98,7 @@ public class AI : IAI
         var messageList = gptMessages.Select(
             message => new ChatMessage(message.Role!, message.Content!)).ToList();
 
+        // call the OpenAI API
         var completionResult = this.openAIService.ChatCompletion.CreateCompletionAsStream(
             new ChatCompletionCreateRequest
             {

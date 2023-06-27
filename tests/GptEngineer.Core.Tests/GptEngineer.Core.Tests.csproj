@@ -27,10 +27,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\GptEngineer.Core\GptEngineer.Core.csproj" />
     <ProjectReference Include="..\..\src\GptEngineer.Infrastructure\GptEngineer.Infrastructure.csproj" />
+    <PackageReference Include="Pinecone.NET" Version="1.2.0" />
+    <PackageReference Include="Word2vec.Tools" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Infrastructure\" />
+    <Folder Include="Data\" />
   </ItemGroup>
 
 </Project>

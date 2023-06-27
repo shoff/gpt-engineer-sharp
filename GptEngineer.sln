@@ -15,7 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0438D178-093
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3E48AA66-289D-41DC-B1E7-E919C45C1302}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptEngineer.Core.Tests", "tests\GptEngineer.Core.Tests\GptEngineer.Core.Tests.csproj", "{C3D90EB9-493F-4247-9116-8CD070D59C9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GptEngineer.Core.Tests", "tests\GptEngineer.Core.Tests\GptEngineer.Core.Tests.csproj", "{C3D90EB9-493F-4247-9116-8CD070D59C9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GptEngineer.Data", "src\GptEngineer.Data\GptEngineer.Data.csproj", "{798C9DAA-9FE8-47E4-BC4F-693B48F0B28B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +45,10 @@ Global
 		{C3D90EB9-493F-4247-9116-8CD070D59C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3D90EB9-493F-4247-9116-8CD070D59C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3D90EB9-493F-4247-9116-8CD070D59C9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{798C9DAA-9FE8-47E4-BC4F-693B48F0B28B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{798C9DAA-9FE8-47E4-BC4F-693B48F0B28B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{798C9DAA-9FE8-47E4-BC4F-693B48F0B28B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{798C9DAA-9FE8-47E4-BC4F-693B48F0B28B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{5CEFDD57-EFA5-41B0-9656-E275A2DE5F27} = {0438D178-093C-4C3E-84D7-4AF70CB596F7}
 		{E7F1E86B-61F0-4EEB-8008-946F3C77B1A9} = {0438D178-093C-4C3E-84D7-4AF70CB596F7}
 		{C3D90EB9-493F-4247-9116-8CD070D59C9D} = {3E48AA66-289D-41DC-B1E7-E919C45C1302}
+		{798C9DAA-9FE8-47E4-BC4F-693B48F0B28B} = {0438D178-093C-4C3E-84D7-4AF70CB596F7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5DBCE7A7-4BEB-430D-85A8-C01F59CEB792}

@@ -1,4 +1,4 @@
-﻿namespace GptEngineer.Core;
+﻿namespace GptEngineer.Core.Stores;
 
 public interface IDataStores
 {

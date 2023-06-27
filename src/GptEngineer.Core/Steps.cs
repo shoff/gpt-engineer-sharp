@@ -4,25 +4,23 @@ namespace GptEngineer.Core;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using GptEngineer.Core.Stores;
 
 public class Steps : ISteps
 {
     private const string GEN_SPEC_MESSAGE = "Based on the conversation so far, please reiterate the specification for the program. If there are things that can be improved, please incorporate the improvements. If you are satisfied with the specification, just write out the specification word by word again.";
-    private const string SPECIFICATION = "specification";
-    private const string MAIN_PROMPT = "main_prompt";
-    private const string SPEC = "spec";
-    private const string CONTENT = "content";
-    private const string RESPEC = "respec";
-    private const string UNIT_TESTS = "unit_tests";
-    private const string USE_QA = "use_qa";
+
     private readonly IDataStores dbs;
+    private readonly IWorkspaceStore workspaceStore;
     private readonly IAI ai;
     private static readonly Regex regex = new(@"(\S+?)\n```\S+\n(.+?)```", RegexOptions.Compiled);
 
-    public Steps(IAI ai, IDataStores dbs)
+    public Steps(IAI ai, IDataStores dbs, 
+        IWorkspaceStore workspaceStore)
     {
         this.ai = ai;
         this.dbs = dbs;
+        this.workspaceStore = workspaceStore;
     }
 
     public string SetupSysPrompt()
@@ -34,10 +32,18 @@ public class Steps : ISteps
     {
         // Run the AI on the main prompt and save the results
         IEnumerable<Dictionary<string, string>> messages = await this.ai.Start(this.SetupSysPrompt(), this.dbs.Input[MAIN_PROMPT]);
-        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
-        return messages;
+
+        var simpleGen = messages as Dictionary<string, string>[] ?? messages.ToArray();
+        
+        if (simpleGen.Length > 0)
+        {
+            this.ToFiles(simpleGen.Last()[CONTENT], this.workspaceStore);
+            return simpleGen;
+        }
+
+        return simpleGen;
     }
-    
+
     public async Task<IEnumerable<Dictionary<string, string>>> Clarify()
     {
         // TODO This is clearly incorrect 
@@ -77,17 +83,21 @@ public class Steps : ISteps
 
     public async Task<IEnumerable<Dictionary<string, string>>> GenSpec()
     {
-        // Generate a spec from the main prompt + clarifications and save the results to the workspace
-        var messages = new List<Dictionary<string, string>>
+        // Generate a spec from the main prompt + clarifications and save the
+        // results to the workspace
+        IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()),
             this.ai.AsSystemRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}")
         };
-        // the call to next must persist or something
-        var spec = await this.ai.NextAsync(messages, this.dbs.Identity[SPEC]);
 
-        this.dbs.Memory[SPECIFICATION] = messages.Last()[CONTENT];
-        return messages;
+        // the call to next must persist or something
+        messages = await this.ai.NextAsync(messages, this.dbs.Identity[SPEC]);
+        var genSpec = messages as Dictionary<string, string>[] ?? messages.ToArray();
+        
+        
+        this.dbs.Memory[SPECIFICATION] = genSpec.Last()[CONTENT];
+        return genSpec;
     }
 
     public async Task<IEnumerable<Dictionary<string, string>>> Respec()
@@ -96,12 +106,12 @@ public class Steps : ISteps
         var genSpec = await this.GenSpec();
 
         var someString = this.dbs.Logs[nameof(genSpec)];
-        
+
         IEnumerable<Dictionary<string, string>> messages = new List<Dictionary<string, string>>
         {
             this.ai.AsSystemRole(this.dbs.Identity[RESPEC])
         };
-       
+
         messages = await this.ai.NextAsync(messages);
 
         messages = await this.ai.NextAsync(
@@ -125,14 +135,14 @@ public class Steps : ISteps
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity[UNIT_TESTS]);
         this.dbs.Memory[UNIT_TESTS] = messages.Last()[CONTENT];
-        this.ToFiles(this.dbs.Memory[UNIT_TESTS], this.dbs.Workspace);
+        this.ToFiles(this.dbs.Memory[UNIT_TESTS], this.workspaceStore);
         return messages;
     }
 
     public async Task<IEnumerable<Dictionary<string, string>>> GenClarifiedCode()
     {
         // TODO this code makes no sense at all
-        var messageList = 
+        var messageList =
             JsonSerializer.Deserialize<List<Dictionary<string, string>>>(this.dbs.Logs[nameof(this.Clarify)]);
 
         IEnumerable<Dictionary<string, string>> messages = messageList;
@@ -143,7 +153,7 @@ public class Steps : ISteps
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity[USE_QA]);
 
-        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
+        this.ToFiles(messages.Last()[CONTENT], this.workspaceStore);
         return messages;
     }
 
@@ -153,12 +163,12 @@ public class Steps : ISteps
         {
             this.ai.AsSystemRole(this.SetupSysPrompt()),
             this.ai.AsUserRole($"Instructions: {this.dbs.Input[MAIN_PROMPT]}"),
-            this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}"), 
+            this.ai.AsUserRole($"Specification:\n\n{this.dbs.Memory[SPECIFICATION]}"),
             this.ai.AsUserRole($"Unit tests:\n\n{this.dbs.Memory[UNIT_TESTS]}")
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Identity[USE_QA]);
-        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
+        this.ToFiles(messages.Last()[CONTENT], this.workspaceStore);
         return messages;
     }
 
@@ -238,7 +248,7 @@ public class Steps : ISteps
             user: "Information about the codebase:\n\n" + this.dbs.Workspace["all_output.txt"]
         );
         // Console.WriteLine();
-        
+
         var regex = new Regex(@"```\S*\n(.+?)```", RegexOptions.Singleline); // huh?
         var matches = regex.Matches(messages.Last()[CONTENT]);
         this.dbs.Workspace["run.bat"] = string.Join("\n", matches.Select(match => match.Groups[1].Value));
@@ -253,7 +263,7 @@ public class Steps : ISteps
         };
 
         messages = await this.ai.NextAsync(messages, this.dbs.Memory["feedback"]);
-        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
+        this.ToFiles(messages.Last()[CONTENT], this.workspaceStore);
         return messages;
     }
 
@@ -266,23 +276,26 @@ public class Steps : ISteps
         };
 
         messages = await this.ai.NextAsync(messages, "Please fix any errors in the code above.");
-        this.ToFiles(messages.Last()[CONTENT], this.dbs.Workspace);
+        this.ToFiles(messages.Last()[CONTENT], this.workspaceStore);
         return messages;
     }
     
-    private void ToFiles(string s, DataStore workspace)
+    private void ToFiles(string text, IWorkspaceStore workspaceStore)
     {
-        workspace["all_output.txt"] = s;
-        var files = this.ParseChat(s);
+        workspaceStore["all_output.txt"] = text;
+
+        var files = this.ParseChat(text);
+        
         foreach (var fileName in files)
         {
             // ??
-            workspace[fileName.Item1] = fileName.Item2;
+            workspaceStore[fileName.Item1] = fileName.Item2;
         }
     }
+    
     public IEnumerable<Tuple<string, string>> ParseChat(string chat)
     {
-        // Get all ``` blocks and preceding filenames
+        // Get all ``` blocks and preceding file names
         var matches = regex.Matches(chat);
 
         var files = new List<Tuple<string, string>>();

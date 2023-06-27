@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Core.Configuration;
+using Data;
 using Extensions;
 using GptEngineer.Core;
 using GptEngineer.Core.Projects;
@@ -17,18 +18,24 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using OpenAI.Extensions;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 using StackExchange.Redis;
+using GptEngineer.Core.Stores;
+using GptEngineer.Data.Contexts;
 
 public static class Ioc
 {
-
+    private const string MONGO_CONNECTION_NAME = "MongoDB";
+    
     public static IServiceCollection ConfigureOptions(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions(); services.Configure<RazorPagesOptions>(options => options.RootDirectory = "/Pages");
         services.Configure<GptOptions>(configuration.GetSection(GPT_OPTIONS));
         services.Configure<AIOptions>(configuration.GetSection(AI_OPTIONS));
         services.Configure<RedisOptions>(configuration.GetSection(REDIS_OPTIONS));
+        services.Configure<AIMemoryOptions>(configuration.GetSection(AI_MEMORY_OPTIONS));
+        services.Configure<InputOptions>(configuration.GetSection(INPUT_OPTIONS));
+        services.Configure<ClarifyOptions>(configuration.GetSection(CLARIFY_OPTIONS));
+        services.Configure<SpecificationStoreOptions>(configuration.GetSection(SPECIFICATION_STORE_OPTIONS));
         return services;
     }
 
@@ -72,6 +79,13 @@ public static class Ioc
                 new[] { APPLICATION_OCTET_STREAM });
         });
 
+        var connectionString = configuration.GetConnectionString(MONGO_CONNECTION_NAME);
+        services.AddSingleton<IMongoClient>(_ =>
+        {
+            var mcs = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
+            return new MongoClient(mcs);
+        });
+
         var redisOptions = configuration.RedisOptions();
         services.AddStackExchangeRedisCache(options =>
         {
@@ -108,10 +122,20 @@ public static class Ioc
         });
 
         // this might need to go on the API
+        
+        services.AddTransient<IClarifyDbContext, ClarifyDbContext>();
+        services.AddTransient<IInputDbContext,  InputDbContext>();
+        services.AddTransient<IAIMemoryDbContext, AIMemoryDbContext>();
+        
+        services.AddSingleton<IClarifyStore, ClarifyStore>();
+        services.AddSingleton<ISpecificationStore, SpecificationStore>();
+        services.AddSingleton<IWorkspaceStore, WorkspaceStore>();
+        services.AddSingleton<IProjectService, ProjectService>();
+        services.AddSingleton<IAIMemoryStore, AIMemoryStore>();
+        services.AddSingleton<IIdentityStore, IdentityStore>();
         services.AddSingleton<IFileSystem, FileSystem>();
         services.AddSingleton<IProjectFactory, ProjectFactory>();
-        services.AddSingleton<IProjectService, ProjectService>();
-        services.AddScoped<ISteps, Steps>();
+        services.AddScoped<ISteps, Core.Steps>();
         services.AddScoped<IStepRunner, StepRunner>();
         services.AddScoped<IDataStores, DataStores>();
         services.AddScoped<IAI, AI>();

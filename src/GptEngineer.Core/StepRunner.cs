@@ -1,12 +1,16 @@
-﻿namespace GptEngineer.Core;
+﻿using GptEngineer.Core.Stores;
+
+namespace GptEngineer.Core;
 
 public class StepRunner : IStepRunner
 {
     private readonly Steps steps;
-
-    public StepRunner(IAI ai, IDataStores dbs)
+    public StepRunner(
+        IAI ai, 
+        IDataStores dbs,
+        IWorkspaceStore workspaceStore)
     {
-        this.steps = new Steps(ai, dbs);
+        this.steps = new Steps(ai, dbs, workspaceStore);
     }
 
     public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Default
@@ -20,15 +24,6 @@ public class StepRunner : IStepRunner
             yield return this.steps.ExecuteEntrypoint;
         }
     }
-    //public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Default =>
-    //    new()
-    //    {
-    //        this.steps.GenSpec,
-    //        this.steps.GenUnitTests,
-    //        this.steps.GenCode,
-    //        this.steps.GenEntrypoint,
-    //        this.steps.ExecuteEntrypoint
-    //    };
 
     public IEnumerable<Func<Task<IEnumerable<Dictionary<string, string>>>>> Benchmark
     {

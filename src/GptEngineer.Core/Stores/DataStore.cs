@@ -1,8 +1,9 @@
 ﻿namespace GptEngineer.Core;
 
 using System.Text;
+using GptEngineer.Core.Stores;
 
-public class DataStore
+public class DataStore : IDataStore
 {
     private readonly string path;
 

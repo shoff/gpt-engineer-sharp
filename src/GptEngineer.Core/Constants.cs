@@ -9,11 +9,23 @@ public static class Constants
     public const string ROOT_COMPONENT = "#app";
     public const string DEFAULT = "default";
 
+    // steps
+    public const string SPECIFICATION = "specification";
+    public const string MAIN_PROMPT = "main_prompt";
+    public const string SPEC = "spec";
+    public const string CONTENT = "content";
+    public const string RESPEC = "respec";
+    public const string UNIT_TESTS = "unit_tests";
+    public const string USE_QA = "use_qa";
+
+    public const string AI_MEMORY_OPTIONS = "AIMemoryOptions";
+    public const string INPUT_OPTIONS = "InputOptions";
+    public const string CLARIFY_OPTIONS = "ClarifyOptions";
+    public const string SPECIFICATION_STORE_OPTIONS = "SpecificationStoreOptions";
+
     // network stuffs
     public const string APPLICATION_OCTET_STREAM = "application/octet-stream";
-
-
-
+    
     // auth
     public const string AUTHORIZED_CLIENT_NAME = "authorizedClient";
     public const string LOG_IN_PATH = "LogInPath";

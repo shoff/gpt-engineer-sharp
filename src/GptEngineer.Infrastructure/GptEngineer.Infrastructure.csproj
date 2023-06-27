@@ -15,6 +15,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\GptEngineer.Core\GptEngineer.Core.csproj" />
+		<ProjectReference Include="..\GptEngineer.Data\GptEngineer.Data.csproj" />
 		<PackageReference Include="FluentValidation" Version="11.5.2" />
 		<PackageReference Include="Mediator.Abstractions" Version="2.1.5" />
 		<PackageReference Include="Mediator.SourceGenerator" Version="2.1.5">
@@ -31,6 +32,9 @@
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="Serilog.Sinks.MongoDB" Version="5.3.1" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Steps\" />
 	</ItemGroup>
 
 </Project>
